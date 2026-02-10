@@ -21,7 +21,7 @@ export function PieChartCard({ title, data, colors }: PieChartCardProps) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={(item) => `${item.name} (${item.percentage?.toFixed(1)}%)`}
+              label={(item) => `${item.name} (${Number(item.percentage || 0).toFixed(1)}%)`}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -32,7 +32,7 @@ export function PieChartCard({ title, data, colors }: PieChartCardProps) {
             </Pie>
             <Tooltip 
               formatter={(value: number, name: string, props: any) => [
-                `${value} (${props.payload.percentage.toFixed(2)}%)`,
+                `${value} (${Number(props.payload.percentage || 0).toFixed(2)}%)`,
                 name
               ]}
             />
