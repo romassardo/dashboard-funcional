@@ -44,9 +44,10 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON fev.value = li.id
+      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
       WHERE fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
+        AND fev.value LIKE CONCAT('%"', li.id, '"%')
         ${dateFilter}
       GROUP BY li.value, li.id
       ORDER BY cantidad DESC;
@@ -67,8 +68,9 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON fev.value = li.id
+      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
       WHERE li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
+        AND fev.value LIKE CONCAT('%"', li.id, '"%')
         ${dateFilter}
       GROUP BY li.value, li.id
       ORDER BY cantidad DESC;
