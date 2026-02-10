@@ -101,13 +101,13 @@ function App() {
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Desde
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-white"
                 value={filters.from || ''}
                 onChange={(e) => setFilters({ ...filters, from: e.target.value })}
               />
@@ -116,7 +116,7 @@ function App() {
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hasta</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-white"
                 value={filters.to || ''}
                 onChange={(e) => setFilters({ ...filters, to: e.target.value })}
               />
@@ -149,7 +149,7 @@ function App() {
           <>
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tickets por Sistema</p>
@@ -160,22 +160,22 @@ function App() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Top Usuarios</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topUsers.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.topUsers.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
                   <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
                     <Users className="w-6 h-6 text-purple-600" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Departamentos</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topDepartments.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.topDepartments.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
                     <Building2 className="w-6 h-6 text-green-600" />
