@@ -135,13 +135,13 @@ export class TicketService {
           FROM ost_ticket t2
           JOIN ost_form_entry fe2 ON t2.ticket_id = fe2.object_id AND fe2.object_type = 'T'
           JOIN ost_form_entry_values fev2 ON fe2.id = fev2.entry_id
-          WHERE fev2.value = 92 AND t2.status_id IN (2, 3) ${dateFilter}
+          WHERE fev2.value LIKE '%"92"%' AND t2.status_id IN (2, 3) ${dateFilter}
         )), 2) as porcentaje
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_ticket_status ts ON t.status_id = ts.id
-      WHERE fev.value = 92
+      WHERE fev.value LIKE '%"92"%'
         AND t.status_id IN (2, 3)
         ${dateFilter}
       GROUP BY ts.name, t.status_id

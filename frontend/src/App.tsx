@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
-import { DateRangeFilter } from './components/filters/DateRangeFilter'
-import { PeriodFilters } from './components/filters/PeriodFilters'
 import { RequirementsTable } from './components/tables/RequirementsTable'
-import { Activity, Loader2 } from 'lucide-react'
+import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2, AlertCircle } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
@@ -20,11 +18,11 @@ function App() {
   })
 
   const CHART_COLORS = {
-    system: ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#6366F1'],
-    type: ['#06B6D4', '#8B5CF6', '#F97316', '#EF4444', '#10B981', '#F59E0B', '#6366F1', '#EC4899'],
-    status: ['#10B981', '#3B82F6'],
-    users: '#3B82F6',
-    departments: '#8B5CF6'
+    system: ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE'],
+    type: ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE', '#EFF6FF'],
+    status: ['#10B981', '#EF4444'],
+    users: '#2563EB',
+    departments: '#7C3AED'
   }
 
   const loadData = async () => {
@@ -69,36 +67,114 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Activity className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Dashboard Soporte Funcional
-            </h1>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Dashboard Soporte Funcional</h1>
+                <p className="text-sm text-slate-500">Métricas y análisis de tickets</p>
+              </div>
+            </div>
           </div>
-          <p className="text-muted-foreground">Panel de métricas y análisis de tickets</p>
-        </header>
+        </div>
+      </header>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <DateRangeFilter onFilterChange={handleDateRangeChange} />
-          <PeriodFilters onFilterChange={handlePeriodChange} />
+      <div className="container mx-auto px-6 py-6">
+        {/* Unified Filter Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                Desde
+              </label>
+              <input
+                type="date"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={filters.from || ''}
+                onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+              />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-slate-700 mb-2">Hasta</label>
+              <input
+                type="date"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={filters.to || ''}
+                onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={loadData}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                Aplicar
+              </button>
+              <button
+                onClick={() => { setFilters({}); loadData(); }}
+                className="px-6 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors font-medium"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-3 text-lg">Cargando datos...</span>
+          <div className="flex items-center justify-center py-12 bg-white rounded-lg shadow-sm">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <span className="ml-3 text-lg text-slate-700">Cargando datos...</span>
           </div>
         )}
 
         {!loading && (
           <>
-            {/* Pie Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Tickets por Sistema</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.ticketsBySystem.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Top Usuarios</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topUsers.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <Users className="w-6 h-6 text-purple-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Departamentos</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topDepartments.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <Building2 className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Charts Row 1 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <PieChartCard
                 title="Tickets por Sistema"
                 data={data.ticketsBySystem}
@@ -109,20 +185,26 @@ function App() {
                 data={data.ticketsByType}
                 colors={CHART_COLORS.type}
               />
+            </div>
+
+            {/* Charts Row 2 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <PieChartCard
                 title="Incidentes Funcionales"
                 data={data.incidentsStatus}
                 colors={CHART_COLORS.status}
               />
+              <div className="lg:col-span-2">
+                <BarChartCard
+                  title="Top 5 Usuarios con más Tickets"
+                  data={data.topUsers}
+                  color={CHART_COLORS.users}
+                />
+              </div>
             </div>
 
-            {/* Bar Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <BarChartCard
-                title="Top 5 Usuarios con más Tickets"
-                data={data.topUsers}
-                color={CHART_COLORS.users}
-              />
+            {/* Departments Chart */}
+            <div className="mb-6">
               <BarChartCard
                 title="Top 5 Departamentos con más Tickets"
                 data={data.topDepartments}
@@ -136,8 +218,8 @@ function App() {
         )}
 
         {/* Footer */}
-        <footer className="mt-12 text-center text-sm text-muted-foreground">
-          <p>Dashboard Soporte Funcional y Data - {new Date().getFullYear()}</p>
+        <footer className="mt-8 text-center text-sm text-slate-500 py-6">
+          <p>Dashboard Soporte Funcional y Data © {new Date().getFullYear()}</p>
         </footer>
       </div>
     </div>

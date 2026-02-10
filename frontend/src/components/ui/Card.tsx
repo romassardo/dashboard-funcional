@@ -6,7 +6,7 @@ export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'glass-card rounded-lg p-6 shadow-xl',
+        'bg-white rounded-lg border border-slate-200 shadow-sm',
         className
       )}
       {...props}
@@ -14,15 +14,24 @@ export function Card({ className, ...props }: CardProps) {
   )
 }
 
-export function CardHeader({ className, ...props }: CardProps) {
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex flex-col space-y-1.5 mb-4', className)} {...props} />
+    <div
+      className={cn('flex flex-col space-y-1.5 p-6 pb-4', className)}
+      {...props}
+    />
   )
 }
 
-export function CardTitle({ className, ...props }: CardProps) {
+export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-xl font-semibold leading-none tracking-tight', className)} {...props} />
+    <h3
+      className={cn(
+        'text-lg font-semibold text-slate-900',
+        className
+      )}
+      {...props}
+    />
   )
 }
 
@@ -32,6 +41,8 @@ export function CardDescription({ className, ...props }: CardProps) {
   )
 }
 
-export function CardContent({ className, ...props }: CardProps) {
-  return <div className={cn('pt-0', className)} {...props} />
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('p-6 pt-0', className)} {...props} />
+  )
 }
