@@ -3,7 +3,7 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { RequirementsTable } from './components/tables/RequirementsTable'
-import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2, Moon, Sun } from 'lucide-react'
+import { BarChart3, Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, Building2, AlertTriangle } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
@@ -21,12 +21,12 @@ function App() {
     functionalRequirements: []
   })
 
-  const CHART_COLORS = {
-    system: ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE'],
-    type: ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE', '#EFF6FF'],
-    status: ['#10B981', '#EF4444'],
-    users: '#2563EB',
-    departments: '#7C3AED'
+  const COLORS = {
+    system: ['#3B82F6', '#6366F1', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE'],
+    type: ['#3B82F6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'],
+    status: ['#10B981', '#F59E0B', '#EF4444'],
+    users: '#6366F1',
+    departments: '#3B82F6'
   }
 
   const loadData = async () => {
@@ -42,11 +42,11 @@ function App() {
       ])
 
       setData({
-        ticketsBySystem: system.map(s => ({ name: s.sistema, value: s.cantidad, percentage: s.porcentaje })),
-        ticketsByType: type.map(t => ({ name: t.tipificacion, value: t.cantidad, percentage: t.porcentaje })),
-        topUsers: users.map(u => ({ name: u.nombre, value: u.cantidad })),
-        topDepartments: departments.map(d => ({ name: d.nombre, value: d.cantidad })),
-        incidentsStatus: incidents.map(i => ({ name: i.estado, value: i.cantidad, percentage: i.porcentaje })),
+        ticketsBySystem: system.map((s: any) => ({ name: s.sistema, value: Number(s.cantidad), percentage: Number(s.porcentaje) })),
+        ticketsByType: type.map((t: any) => ({ name: t.tipificacion, value: Number(t.cantidad), percentage: Number(t.porcentaje) })),
+        topUsers: users.map((u: any) => ({ name: u.nombre, value: Number(u.cantidad) })),
+        topDepartments: departments.map((d: any) => ({ name: d.nombre, value: Number(d.cantidad) })),
+        incidentsStatus: incidents.map((i: any) => ({ name: i.estado, value: Number(i.cantidad), percentage: Number(i.porcentaje) })),
         functionalRequirements: requirements
       })
     } catch (error) {
@@ -56,67 +56,69 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  useEffect(() => { loadData() }, [])
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode))
-    if (darkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    document.documentElement.classList.toggle('dark', darkMode)
   }, [darkMode])
 
+  const statCards = [
+    { label: 'Tickets Sistema', value: data.ticketsBySystem.reduce((s: number, i: any) => s + i.value, 0), icon: Ticket, color: 'blue' },
+    { label: 'Tickets Tipificación', value: data.ticketsByType.reduce((s: number, i: any) => s + i.value, 0), icon: AlertTriangle, color: 'indigo' },
+    { label: 'Usuarios Activos', value: data.topUsers.length, icon: Users, color: 'violet' },
+    { label: 'Departamentos', value: data.topDepartments.length, icon: Building2, color: 'emerald' },
+  ]
+
+  const colorMap: Record<string, string> = {
+    blue: 'from-blue-500 to-blue-600',
+    indigo: 'from-indigo-500 to-indigo-600',
+    violet: 'from-violet-500 to-violet-600',
+    emerald: 'from-emerald-500 to-emerald-600',
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#0f172a] transition-colors duration-300">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Soporte Funcional</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Métricas y análisis de tickets</p>
-              </div>
+      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <BarChart3 className="w-5 h-5 text-white" />
             </div>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
-            </button>
+            <div>
+              <h1 className="text-lg font-bold text-slate-900 dark:text-white">Soporte Funcional</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Panel de Control</p>
+            </div>
           </div>
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all"
+          >
+            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+          </button>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-6">
-        {/* Unified Filter Bar */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <Calendar className="w-4 h-4 inline mr-1" />
-                Desde
-              </label>
+      <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Filter Bar */}
+        <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
+          <div className="flex flex-wrap items-end gap-3">
+            <Filter className="w-4 h-4 text-slate-400 mb-2" />
+            <div className="flex-1 min-w-[160px]">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Desde</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-slate-900 dark:text-white transition-all"
                 value={filters.from || ''}
                 onChange={(e) => setFilters({ ...filters, from: e.target.value })}
               />
             </div>
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hasta</label>
+            <div className="flex-1 min-w-[160px]">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Hasta</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-slate-900 dark:text-white transition-all"
                 value={filters.to || ''}
                 onChange={(e) => setFilters({ ...filters, to: e.target.value })}
               />
@@ -124,104 +126,80 @@ function App() {
             <div className="flex gap-2">
               <button
                 onClick={loadData}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                className="px-5 py-2 text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium shadow-sm shadow-blue-500/20"
               >
                 Aplicar
               </button>
               <button
-                onClick={() => { setFilters({}); loadData(); }}
-                className="px-6 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors font-medium"
+                onClick={() => { setFilters({}); setTimeout(loadData, 50); }}
+                className="px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600/50 transition-all"
               >
-                Limpiar
+                <RotateCcw className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {loading && (
-          <div className="flex items-center justify-center py-12 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-3 text-lg text-slate-700 dark:text-slate-300">Cargando datos...</span>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-3" />
+            <span className="text-sm text-slate-500 dark:text-slate-400">Cargando datos...</span>
           </div>
-        )}
-
-        {!loading && (
+        ) : (
           <>
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tickets por Sistema</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.ticketsBySystem.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {statCards.map((card) => (
+                <div key={card.label} className="relative overflow-hidden bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-5 backdrop-blur-sm group hover:shadow-lg transition-all duration-300">
+                  <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${colorMap[card.color]} opacity-10 rounded-bl-[40px] group-hover:opacity-20 transition-opacity`} />
+                  <div className={`w-9 h-9 bg-gradient-to-br ${colorMap[card.color]} rounded-lg flex items-center justify-center mb-3 shadow-sm`}>
+                    <card.icon className="w-4 h-4 text-white" />
                   </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-blue-600" />
-                  </div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{card.value}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{card.label}</p>
                 </div>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Top Usuarios</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.topUsers.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
-                  </div>
-                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                    <Users className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Departamentos</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.topDepartments.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
-                  </div>
-                  <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                    <Building2 className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* Charts Row 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Row 1: System Donut + Tipification Bars */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PieChartCard
                 title="Tickets por Sistema"
                 data={data.ticketsBySystem}
-                colors={CHART_COLORS.system}
+                colors={COLORS.system}
+                centerLabel="Tickets"
               />
-              <PieChartCard
+              <BarChartCard
                 title="Tickets por Tipificación"
                 data={data.ticketsByType}
-                colors={CHART_COLORS.type}
+                color="#6366F1"
+                layout="vertical"
               />
             </div>
 
-            {/* Charts Row 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Row 2: Incidents + Top Users */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <PieChartCard
-                title="Incidentes Funcionales"
+                title="Estado Incidentes"
                 data={data.incidentsStatus}
-                colors={CHART_COLORS.status}
+                colors={COLORS.status}
+                centerLabel="Incidentes"
               />
               <div className="lg:col-span-2">
                 <BarChartCard
                   title="Top 5 Usuarios con más Tickets"
                   data={data.topUsers}
-                  color={CHART_COLORS.users}
+                  color={COLORS.users}
                 />
               </div>
             </div>
 
-            {/* Departments Chart */}
-            <div className="mb-6">
-              <BarChartCard
-                title="Top 5 Departamentos con más Tickets"
-                data={data.topDepartments}
-                color={CHART_COLORS.departments}
-              />
-            </div>
+            {/* Row 3: Departments */}
+            <BarChartCard
+              title="Top 5 Departamentos con más Tickets"
+              data={data.topDepartments}
+              color={COLORS.departments}
+            />
 
             {/* Requirements Table */}
             <RequirementsTable requirements={data.functionalRequirements} />
@@ -229,10 +207,10 @@ function App() {
         )}
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 py-6">
-          <p>Dashboard Soporte Funcional y Data © {new Date().getFullYear()}</p>
+        <footer className="text-center text-xs text-slate-400 dark:text-slate-500 py-4 border-t border-slate-200/50 dark:border-slate-700/30">
+          Dashboard Soporte Funcional y Data &copy; {new Date().getFullYear()}
         </footer>
-      </div>
+      </main>
     </div>
   )
 }
