@@ -3,7 +3,7 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { RequirementsTable } from './components/tables/RequirementsTable'
-import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2, AlertCircle } from 'lucide-react'
+import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2 } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
@@ -56,15 +56,6 @@ function App() {
     loadData()
   }, [])
 
-  const handleDateRangeChange = (from: string, to: string) => {
-    setFilters({ from, to })
-    setTimeout(() => loadData(), 100)
-  }
-
-  const handlePeriodChange = (year?: number, month?: number, day?: number) => {
-    setFilters({ year, month, day })
-    setTimeout(() => loadData(), 100)
-  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -142,7 +133,7 @@ function App() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Tickets por Sistema</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.ticketsBySystem.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.ticketsBySystem.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-blue-600" />
@@ -153,7 +144,7 @@ function App() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Top Usuarios</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topUsers.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topUsers.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
                   <div className="p-3 bg-purple-50 rounded-lg">
                     <Users className="w-6 h-6 text-purple-600" />
@@ -164,7 +155,7 @@ function App() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Departamentos</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topDepartments.reduce((sum, item) => sum + Number(item.value), 0)}</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.topDepartments.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
                   <div className="p-3 bg-green-50 rounded-lg">
                     <Building2 className="w-6 h-6 text-green-600" />
