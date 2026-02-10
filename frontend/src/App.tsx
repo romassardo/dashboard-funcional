@@ -3,11 +3,15 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { RequirementsTable } from './components/tables/RequirementsTable'
-import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2 } from 'lucide-react'
+import { BarChart3, Loader2, Calendar, TrendingUp, Users, Building2, Moon, Sun } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
   const [loading, setLoading] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode')
+    return saved ? JSON.parse(saved) : true
+  })
   const [data, setData] = useState<any>({
     ticketsBySystem: [],
     ticketsByType: [],
@@ -56,11 +60,20 @@ function App() {
     loadData()
   }, [])
 
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode))
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [darkMode])
+
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -68,17 +81,24 @@ function App() {
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Dashboard Soporte Funcional</h1>
-                <p className="text-sm text-slate-500">Métricas y análisis de tickets</p>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Soporte Funcional</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Métricas y análisis de tickets</p>
               </div>
             </div>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
+            </button>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-6 py-6">
         {/* Unified Filter Bar */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -93,7 +113,7 @@ function App() {
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-slate-700 mb-2">Hasta</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hasta</label>
               <input
                 type="date"
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -119,9 +139,9 @@ function App() {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-12 bg-white rounded-lg shadow-sm">
+          <div className="flex items-center justify-center py-12 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-3 text-lg text-slate-700">Cargando datos...</span>
+            <span className="ml-3 text-lg text-slate-700 dark:text-slate-300">Cargando datos...</span>
           </div>
         )}
 
@@ -132,10 +152,10 @@ function App() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Tickets por Sistema</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{data.ticketsBySystem.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tickets por Sistema</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{data.ticketsBySystem.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
-                  <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-blue-600" />
                   </div>
                 </div>
@@ -143,10 +163,10 @@ function App() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Top Usuarios</p>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Top Usuarios</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{data.topUsers.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-lg">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
                     <Users className="w-6 h-6 text-purple-600" />
                   </div>
                 </div>
@@ -154,10 +174,10 @@ function App() {
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Departamentos</p>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Departamentos</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{data.topDepartments.reduce((sum: number, item: any) => sum + Number(item.value), 0)}</p>
                   </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
                     <Building2 className="w-6 h-6 text-green-600" />
                   </div>
                 </div>
@@ -209,7 +229,7 @@ function App() {
         )}
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-sm text-slate-500 py-6">
+        <footer className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 py-6">
           <p>Dashboard Soporte Funcional y Data © {new Date().getFullYear()}</p>
         </footer>
       </div>

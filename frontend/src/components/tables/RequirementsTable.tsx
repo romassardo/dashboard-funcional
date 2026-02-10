@@ -21,17 +21,17 @@ export function RequirementsTable({ requirements }: RequirementsTableProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-semibold">Ticket</th>
-                  <th className="text-left py-3 px-4 font-semibold">Título</th>
-                  <th className="text-left py-3 px-4 font-semibold">Fecha Solicitud</th>
-                  <th className="text-left py-3 px-4 font-semibold">Fecha Implementación</th>
-                  <th className="text-left py-3 px-4 font-semibold">Acciones</th>
+                <tr className="border-b border-border dark:border-border-dark">
+                  <th className="text-left py-3 px-4 font-semibold dark:text-muted-foreground-dark">Ticket</th>
+                  <th className="text-left py-3 px-4 font-semibold dark:text-muted-foreground-dark">Título</th>
+                  <th className="text-left py-3 px-4 font-semibold dark:text-muted-foreground-dark">Fecha Solicitud</th>
+                  <th className="text-left py-3 px-4 font-semibold dark:text-muted-foreground-dark">Fecha Implementación</th>
+                  <th className="text-left py-3 px-4 font-semibold dark:text-muted-foreground-dark">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {requirements.map((req) => (
-                  <tr key={req.ticket_number} className="border-b border-border/50 hover:bg-white/5 transition-colors">
+                  <tr key={req.ticket_number} className="border-b border-border/50 hover:bg-white/5 dark:hover:bg-black/10 transition-colors">
                     <td className="py-3 px-4 font-mono text-xs">{req.ticket_number}</td>
                     <td className="py-3 px-4">{req.titulo}</td>
                     <td className="py-3 px-4">{formatDate(req.fecha_solicitud)}</td>
@@ -39,7 +39,7 @@ export function RequirementsTable({ requirements }: RequirementsTableProps) {
                     <td className="py-3 px-4">
                       <button
                         onClick={() => setSelectedRequirement(req)}
-                        className="p-2 hover:bg-white/10 rounded-md transition-colors"
+                        className="p-2 hover:bg-white/10 dark:hover:bg-black/10 rounded-md transition-colors"
                         title="Ver detalles"
                       >
                         <Eye className="w-4 h-4" />
@@ -50,7 +50,7 @@ export function RequirementsTable({ requirements }: RequirementsTableProps) {
               </tbody>
             </table>
             {requirements.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground dark:text-muted-foreground-dark">
                 No se encontraron requerimientos funcionales
               </div>
             )}
