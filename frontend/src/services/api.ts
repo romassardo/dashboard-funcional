@@ -117,7 +117,7 @@ export const dashboardApi = {
     return response.data.data
   },
 
-  getTicketList: async (params: { page?: number; limit?: number; search?: string; status?: string; from?: string; to?: string; year?: number; month?: number; day?: number }) => {
+  getTicketList: async (params: { page?: number; limit?: number; search?: string; status?: string; tipificacion?: string; from?: string; to?: string; year?: number; month?: number; day?: number }) => {
     const response = await api.get('/tickets', { params })
     return response.data.data
   },

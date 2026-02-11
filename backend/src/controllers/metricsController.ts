@@ -83,6 +83,7 @@ export class MetricsController {
         limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
         search: req.query.search as string,
         status: req.query.status as string,
+        tipificacion: req.query.tipificacion as string,
         from: req.query.from as string,
         to: req.query.to as string,
         year: req.query.year ? parseInt(req.query.year as string) : undefined,

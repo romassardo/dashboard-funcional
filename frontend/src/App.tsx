@@ -204,7 +204,7 @@ function App() {
               />
               <div className="lg:col-span-2">
                 <BarChartCard
-                  title="Top 5 Usuarios con más Tickets"
+                  title="Top 10 Usuarios con más Tickets"
                   data={data.topUsers}
                   color={COLORS.users}
                 />
@@ -213,7 +213,7 @@ function App() {
 
             {/* Row 3: Departments */}
             <BarChartCard
-              title="Top 5 Departamentos con más Tickets"
+              title="Top 5 Sectores/Áreas con más Tickets"
               data={data.topDepartments}
               color={COLORS.departments}
               showPercentage

@@ -89,7 +89,7 @@ export class TicketService {
     return rows as TicketsByType[];
   }
 
-  async getTopUsers(filters: DateFilter, limit: number = 5): Promise<TopUser[]> {
+  async getTopUsers(filters: DateFilter, limit: number = 10): Promise<TopUser[]> {
     const { clause, params } = this.buildDateFilter(filters);
     
     const query = `
@@ -196,7 +196,7 @@ export class TicketService {
 
   async getTicketList(params: {
     page?: number; limit?: number; search?: string;
-    status?: string; from?: string; to?: string;
+    status?: string; tipificacion?: string; from?: string; to?: string;
     year?: number; month?: number; day?: number;
   }): Promise<{ tickets: any[]; total: number; page: number; limit: number }> {
     const page = params.page || 1;
@@ -205,11 +205,21 @@ export class TicketService {
     const conditions: string[] = ['t.number >= 5000'];
     const queryParams: any[] = [];
 
+    if (params.tipificacion) {
+      conditions.push(`EXISTS (
+        SELECT 1 FROM ost_form_entry fe_t
+        JOIN ost_form_entry_values fev_t ON fe_t.id = fev_t.entry_id AND fev_t.field_id = 57
+        JOIN ost_list_items li_t ON fev_t.value LIKE CONCAT('%"', li_t.id, '"%')
+        WHERE fe_t.object_id = t.ticket_id AND fe_t.object_type = 'T' AND li_t.value = ?
+      )`);
+      queryParams.push(params.tipificacion);
+    }
+
     if (params.search) {
       const s = `%${params.search}%`;
       conditions.push(`(t.number LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ? OR EXISTS (
         SELECT 1 FROM ost_form_entry fe_x
-        JOIN ost_form_entry_values fev_x ON fe_x.id = fev_x.entry_id AND fev_x.field_id = 61
+        JOIN ost_form_entry_values fev_x ON fe_x.id = fev_x.entry_id AND fev_x.field_id IN (61, 57)
         JOIN ost_list_items li_x ON fev_x.value LIKE CONCAT('%"', li_x.id, '"%')
         WHERE fe_x.object_id = t.ticket_id AND fe_x.object_type = 'T' AND li_x.value LIKE ?
       ))`);
@@ -271,20 +281,27 @@ export class TicketService {
 
     const tickets = rows as any[];
 
-    // Step 3: Batch-resolve sectors for returned ticket_ids only
+    // Step 3: Batch-resolve sector (61) and tipificacion (57)
     if (tickets.length > 0) {
       const ticketIds = tickets.map((t: any) => t.ticket_id);
       const placeholders = ticketIds.map(() => '?').join(',');
-      const [sectorRows] = await pool.query<RowDataPacket[]>(`
-        SELECT fe.object_id as ticket_id, li.value as sector
+      const [fieldRows] = await pool.query<RowDataPacket[]>(`
+        SELECT fe.object_id as ticket_id, fev.field_id, li.value as val
         FROM ost_form_entry fe
-        JOIN ost_form_entry_values fev ON fe.id = fev.entry_id AND fev.field_id = 61
+        JOIN ost_form_entry_values fev ON fe.id = fev.entry_id AND fev.field_id IN (61, 57)
         JOIN ost_list_items li ON fev.value LIKE CONCAT('%"', li.id, '"%')
         WHERE fe.object_id IN (${placeholders}) AND fe.object_type = 'T'
       `, ticketIds);
       const sectorMap: Record<number, string> = {};
-      (sectorRows as any[]).forEach((r: any) => { sectorMap[r.ticket_id] = r.sector; });
-      tickets.forEach((t: any) => { t.sector = sectorMap[t.ticket_id] || null; });
+      const tipifMap: Record<number, string> = {};
+      (fieldRows as any[]).forEach((r: any) => {
+        if (r.field_id === 61) sectorMap[r.ticket_id] = r.val;
+        if (r.field_id === 57) tipifMap[r.ticket_id] = r.val;
+      });
+      tickets.forEach((t: any) => {
+        t.sector = sectorMap[t.ticket_id] || null;
+        t.tipificacion = tipifMap[t.ticket_id] || null;
+      });
     }
 
     return { tickets, total: (countRows[0] as any).total, page, limit };

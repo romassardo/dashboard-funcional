@@ -18,6 +18,7 @@ export function TicketListPage() {
   const [search, setSearch] = useState('')
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
   const [statusFilter, setStatusFilter] = useState('')
+  const [tipifFilter, setTipifFilter] = useState('')
   const [fromFilter, setFromFilter] = useState('')
   const [toFilter, setToFilter] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -29,6 +30,7 @@ export function TicketListPage() {
       const params: any = { page, limit }
       if (search) params.search = search
       if (statusFilter) params.status = statusFilter
+      if (tipifFilter) params.tipificacion = tipifFilter
       if (fromFilter) params.from = fromFilter
       if (toFilter) params.to = toFilter
       const result = await dashboardApi.getTicketList(params)
@@ -39,7 +41,7 @@ export function TicketListPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, limit, search, statusFilter, fromFilter, toFilter])
+  }, [page, limit, search, statusFilter, tipifFilter, fromFilter, toFilter])
 
   useEffect(() => { loadTickets() }, [loadTickets])
 
@@ -54,13 +56,14 @@ export function TicketListPage() {
   const clearFilters = () => {
     setSearch('')
     setStatusFilter('')
+    setTipifFilter('')
     setFromFilter('')
     setToFilter('')
     setPage(1)
   }
 
   const totalPages = Math.ceil(total / limit)
-  const hasFilters = search || statusFilter || fromFilter || toFilter
+  const hasFilters = search || statusFilter || tipifFilter || fromFilter || toFilter
 
   return (
     <div className="space-y-4">
@@ -107,6 +110,16 @@ export function TicketListPage() {
             </select>
           </div>
           <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tipificación</label>
+            <select className="px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg text-slate-900 dark:text-white" value={tipifFilter} onChange={(e) => { setTipifFilter(e.target.value); setPage(1) }}>
+              <option value="">Todas</option>
+              <option value="Incidente Funcional">Incidente Funcional</option>
+              <option value="Requerimiento Funcional">Requerimiento Funcional</option>
+              <option value="Incidente de Datos">Incidente de Datos</option>
+              <option value="Requerimiento de Datos">Requerimiento de Datos</option>
+            </select>
+          </div>
+          <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Desde</label>
             <input type="date" className="px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg text-slate-900 dark:text-white" value={fromFilter} onChange={(e) => { setFromFilter(e.target.value); setPage(1) }} />
           </div>
@@ -135,9 +148,10 @@ export function TicketListPage() {
         </div>
 
         {/* Column Headers */}
-        <div className="grid grid-cols-[80px_1fr_90px_1fr_1fr_130px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20 text-center">
+        <div className="grid grid-cols-[80px_90px_1fr_1fr_1fr_1fr_120px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20 text-center">
           <div>Número</div>
           <div>Estado</div>
+          <div>Tipificación</div>
           <div>Agente</div>
           <div>Sector</div>
           <div>Usuario</div>
@@ -155,12 +169,13 @@ export function TicketListPage() {
             <div
               key={ticket.ticket_id}
               onClick={() => setSelectedTicketId(ticket.ticket_id)}
-              className="grid grid-cols-[80px_1fr_90px_1fr_1fr_130px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center text-center"
+              className="grid grid-cols-[80px_90px_1fr_1fr_1fr_1fr_120px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center text-center"
             >
               <div className="text-sm font-mono text-cyan-500">#{ticket.number}</div>
               <div>
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[ticket.estado] || 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>{ticket.estado}</span>
               </div>
+              <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.tipificacion || '—'}</div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.agente}</div>
               <div>
                 {ticket.sector && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 truncate inline-block max-w-full">{ticket.sector}</span>}
