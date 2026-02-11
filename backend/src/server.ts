@@ -23,7 +23,7 @@ const CACHE_TTL = 5 * 60 * 1000;
 app.use('/api/metrics', (req, res, next) => {
   const key = req.originalUrl;
   // Skip cache for ticket list, detail, and attachments (unique URLs)
-  if (key.includes('/tickets') || key.includes('/attachments')) {
+  if (key.includes('/tickets') || key.includes('/attachments') || key.includes('/open-ticket-count')) {
     return next();
   }
   const cached = cache.get(key);

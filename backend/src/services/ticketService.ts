@@ -195,12 +195,15 @@ export class TicketService {
   }
 
   async getOpenTicketCount(): Promise<number> {
-    const [rows] = await pool.query<RowDataPacket[]>(`
-      SELECT COUNT(*) as total FROM ost_ticket t
-      JOIN ost_ticket_status ts ON t.status_id = ts.id
-      WHERE t.number >= 5000 AND ts.name = 'Open'
-    `);
-    return Number((rows[0] as any).total) || 0;
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT CAST(COUNT(*) AS SIGNED) as total FROM ost_ticket t
+       JOIN ost_ticket_status ts ON t.status_id = ts.id
+       WHERE t.number >= 5000 AND ts.name = ?`,
+      ['Open']
+    );
+    const val = (rows[0] as any)?.total;
+    console.log('[getOpenTicketCount] raw value:', val, 'type:', typeof val);
+    return Number(val) || 0;
   }
 
   async getTicketList(params: {
