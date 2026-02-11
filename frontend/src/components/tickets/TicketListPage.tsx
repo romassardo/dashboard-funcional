@@ -48,7 +48,7 @@ export function TicketListPage() {
     debounceRef.current = setTimeout(() => {
       setSearch(value)
       setPage(1)
-    }, 400)
+    }, 700)
   }
 
   const clearFilters = () => {

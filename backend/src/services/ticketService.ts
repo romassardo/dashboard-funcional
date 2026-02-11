@@ -206,8 +206,13 @@ export class TicketService {
     const queryParams: any[] = [];
 
     if (params.search) {
-      conditions.push(`(t.number LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ? OR li_sector.value LIKE ?)`);
       const s = `%${params.search}%`;
+      conditions.push(`(t.number LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ? OR EXISTS (
+        SELECT 1 FROM ost_form_entry fe_x
+        JOIN ost_form_entry_values fev_x ON fe_x.id = fev_x.entry_id AND fev_x.field_id = 61
+        JOIN ost_list_items li_x ON fev_x.value LIKE CONCAT('%"', li_x.id, '"%')
+        WHERE fe_x.object_id = t.ticket_id AND fe_x.object_type = 'T' AND li_x.value LIKE ?
+      ))`);
       queryParams.push(s, s, s, s);
     }
     if (params.status) {
@@ -225,23 +230,21 @@ export class TicketService {
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
+    // Step 1: Fast count (no sector JOINs)
     const countQuery = `
-      SELECT COUNT(DISTINCT t.ticket_id) as total
+      SELECT COUNT(*) as total
       FROM ost_ticket t
       LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
       JOIN ost_ticket_status ts ON t.status_id = ts.id
       JOIN ost_user u ON t.user_id = u.id
       LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
-      LEFT JOIN ost_form_entry fe_s ON t.ticket_id = fe_s.object_id AND fe_s.object_type = 'T'
-      LEFT JOIN ost_form_entry_values fev_s ON fe_s.id = fev_s.entry_id AND fev_s.field_id = 61
-      LEFT JOIN ost_list_items li_sector ON fev_s.value LIKE CONCAT('%"', li_sector.id, '"%')
       ${where}
     `;
 
+    // Step 2: Fast list (no sector JOINs)
     const listQuery = `
       SELECT 
         t.ticket_id, t.number,
-        tc.subject as asunto,
         CASE ts.name
           WHEN 'Open' THEN 'Abierto'
           WHEN 'Resolved' THEN 'Resuelto'
@@ -250,18 +253,13 @@ export class TicketService {
         END as estado,
         COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
         u.name as usuario,
-        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion,
-        li_sector.value as sector
+        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion
       FROM ost_ticket t
       LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
       JOIN ost_ticket_status ts ON t.status_id = ts.id
       JOIN ost_user u ON t.user_id = u.id
       LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
-      LEFT JOIN ost_form_entry fe_s ON t.ticket_id = fe_s.object_id AND fe_s.object_type = 'T'
-      LEFT JOIN ost_form_entry_values fev_s ON fe_s.id = fev_s.entry_id AND fev_s.field_id = 61
-      LEFT JOIN ost_list_items li_sector ON fev_s.value LIKE CONCAT('%"', li_sector.id, '"%')
       ${where}
-      GROUP BY t.ticket_id
       ORDER BY t.created DESC
       LIMIT ${Number(limit)} OFFSET ${Number(offset)}
     `;
@@ -271,7 +269,25 @@ export class TicketService {
       pool.query<RowDataPacket[]>(listQuery, queryParams)
     ]);
 
-    return { tickets: rows as any[], total: (countRows[0] as any).total, page, limit };
+    const tickets = rows as any[];
+
+    // Step 3: Batch-resolve sectors for returned ticket_ids only
+    if (tickets.length > 0) {
+      const ticketIds = tickets.map((t: any) => t.ticket_id);
+      const placeholders = ticketIds.map(() => '?').join(',');
+      const [sectorRows] = await pool.query<RowDataPacket[]>(`
+        SELECT fe.object_id as ticket_id, li.value as sector
+        FROM ost_form_entry fe
+        JOIN ost_form_entry_values fev ON fe.id = fev.entry_id AND fev.field_id = 61
+        JOIN ost_list_items li ON fev.value LIKE CONCAT('%"', li.id, '"%')
+        WHERE fe.object_id IN (${placeholders}) AND fe.object_type = 'T'
+      `, ticketIds);
+      const sectorMap: Record<number, string> = {};
+      (sectorRows as any[]).forEach((r: any) => { sectorMap[r.ticket_id] = r.sector; });
+      tickets.forEach((t: any) => { t.sector = sectorMap[t.ticket_id] || null; });
+    }
+
+    return { tickets, total: (countRows[0] as any).total, page, limit };
   }
 
   async getTicketDetail(ticketId: number): Promise<any> {

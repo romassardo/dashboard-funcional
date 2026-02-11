@@ -22,6 +22,10 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 app.use('/api/metrics', (req, res, next) => {
   const key = req.originalUrl;
+  // Skip cache for ticket list, detail, and attachments (unique URLs)
+  if (key.includes('/tickets') || key.includes('/attachments')) {
+    return next();
+  }
   const cached = cache.get(key);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return res.json(cached.data);
