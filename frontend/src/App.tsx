@@ -3,7 +3,7 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { MonthlySummaryCard } from './components/tables/MonthlySummaryCard'
-import { BarChart3, Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, Building2, AlertTriangle } from 'lucide-react'
+import { BarChart3, Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, AlertTriangle } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
@@ -64,7 +64,6 @@ function App() {
     { label: 'Tickets Sistema', value: data.ticketsBySystem.reduce((s: number, i: any) => s + i.value, 0), icon: Ticket, color: 'blue' },
     { label: 'Tickets Tipificación', value: data.ticketsByType.reduce((s: number, i: any) => s + i.value, 0), icon: AlertTriangle, color: 'indigo' },
     { label: 'Usuarios Activos', value: data.topUsers.length, icon: Users, color: 'violet' },
-    { label: 'Departamentos', value: data.topDepartments.length, icon: Building2, color: 'emerald' },
   ]
 
   const colorMap: Record<string, string> = {
@@ -145,7 +144,7 @@ function App() {
         ) : (
           <>
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {statCards.map((card) => (
                 <div key={card.label} className="relative overflow-hidden bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-5 backdrop-blur-sm group hover:shadow-lg transition-all duration-300">
                   <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${colorMap[card.color]} opacity-10 rounded-bl-[40px] group-hover:opacity-20 transition-opacity`} />
