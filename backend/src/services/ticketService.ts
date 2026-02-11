@@ -200,7 +200,7 @@ export class TicketService {
     year?: number; month?: number; day?: number;
   }): Promise<{ tickets: any[]; total: number; page: number; limit: number }> {
     const page = params.page || 1;
-    const limit = Math.min(params.limit || 100, 500);
+    const limit = Math.min(params.limit || 50, 200);
     const offset = (page - 1) * limit;
     const conditions: string[] = ['t.number >= 5000'];
     const queryParams: any[] = [];
@@ -242,12 +242,7 @@ export class TicketService {
         ts.name as estado,
         COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
         u.name as usuario,
-        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion,
-        (SELECT li.value FROM ost_form_entry fe
-         JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-         JOIN ost_list_items li ON fev.value LIKE CONCAT('%"', li.id, '"%')
-         WHERE fe.object_id = t.ticket_id AND fe.object_type = 'T' AND fev.field_id = 61
-         LIMIT 1) as sector
+        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion
       FROM ost_ticket t
       LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
       LEFT JOIN ost_sla sla ON t.sla_id = sla.id
@@ -256,11 +251,13 @@ export class TicketService {
       LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
       ${where}
       ORDER BY t.created DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${Number(limit)} OFFSET ${Number(offset)}
     `;
 
-    const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, queryParams);
-    const [rows] = await pool.execute<RowDataPacket[]>(listQuery, [...queryParams, limit, offset]);
+    const [[countRows], [rows]] = await Promise.all([
+      pool.query<RowDataPacket[]>(countQuery, queryParams),
+      pool.query<RowDataPacket[]>(listQuery, queryParams)
+    ]);
 
     return { tickets: rows as any[], total: (countRows[0] as any).total, page, limit };
   }

@@ -15,7 +15,7 @@ export function TicketListPage() {
   const [tickets, setTickets] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(100)
+  const [limit] = useState(50)
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -134,19 +134,18 @@ export function TicketListPage() {
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-500" />
             <span className="text-sm font-semibold text-slate-800 dark:text-white">Tickets</span>
-            <span className="text-xs bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full">{limit}</span>
+            <span className="text-xs bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full">pág {page}</span>
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">{total.toLocaleString()} resultados</span>
         </div>
 
         {/* Column Headers */}
-        <div className="grid grid-cols-[80px_1fr_130px_100px_140px_130px_140px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20">
+        <div className="grid grid-cols-[80px_1fr_130px_100px_160px_160px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20">
           <div>Número</div>
           <div>Asunto</div>
           <div>SLA</div>
           <div>Estado</div>
           <div>Agente</div>
-          <div>Sector</div>
           <div>Usuario</div>
         </div>
 
@@ -161,7 +160,7 @@ export function TicketListPage() {
             <div
               key={ticket.ticket_id}
               onClick={() => setSelectedTicketId(ticket.ticket_id)}
-              className="grid grid-cols-[80px_1fr_130px_100px_140px_130px_140px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center"
+              className="grid grid-cols-[80px_1fr_130px_100px_160px_160px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center"
             >
               <div className="text-sm font-mono text-cyan-500">#{ticket.number}</div>
               <div className="text-sm text-slate-700 dark:text-slate-200 truncate">{ticket.asunto || '(sin asunto)'}</div>
@@ -172,9 +171,6 @@ export function TicketListPage() {
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[ticket.estado] || 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>{ticket.estado}</span>
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.agente}</div>
-              <div>
-                {ticket.sector && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 truncate inline-block max-w-full">{ticket.sector}</span>}
-              </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.usuario}</div>
             </div>
           ))}
