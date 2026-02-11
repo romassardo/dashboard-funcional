@@ -19,13 +19,8 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1048576).toFixed(1)} MB`
 }
 
-function stripHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, 'text/html')
-  return doc.body.textContent || ''
-}
-
 function parseFieldValue(value: string | null): string {
-  if (!value || value === 'null' || value === '0') return ''
+  if (!value || value === 'null' || value === '0' || value === 'false') return ''
   let result = value
   try {
     const parsed = JSON.parse(value)
@@ -37,7 +32,8 @@ function parseFieldValue(value: string | null): string {
   } catch {
     // not JSON, keep as-is
   }
-  if (result.includes('<')) result = stripHtml(result)
+  // Strip all HTML tags with regex
+  result = result.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ')
   return result.trim()
 }
 
