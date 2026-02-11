@@ -11,6 +11,7 @@ router.get('/top-departments', (req, res) => metricsController.getTopDepartments
 router.get('/incidents-status', (req, res) => metricsController.getIncidentsStatus(req, res));
 router.get('/functional-requirements', (req, res) => metricsController.getFunctionalRequirements(req, res));
 router.get('/monthly-summary', (req, res) => metricsController.getMonthlySummary(req, res));
+router.get('/open-ticket-count', (req, res) => metricsController.getOpenTicketCount(req, res));
 router.get('/tickets', (req, res) => metricsController.getTicketList(req, res));
 router.get('/tickets/:ticketId', (req, res) => metricsController.getTicketDetail(req, res));
 router.get('/attachments/:fileId', (req, res) => metricsController.getAttachment(req, res));

@@ -76,6 +76,15 @@ export class MetricsController {
     }
   }
 
+  async getOpenTicketCount(_req: Request, res: Response): Promise<void> {
+    try {
+      const total = await ticketService.getOpenTicketCount();
+      res.json({ success: true, data: { total } });
+    } catch (error) {
+      handleError(res, 'getOpenTicketCount', 'Error al obtener tickets abiertos', error);
+    }
+  }
+
   async getTicketList(req: Request, res: Response): Promise<void> {
     try {
       const data = await ticketService.getTicketList({

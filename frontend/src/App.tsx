@@ -33,13 +33,13 @@ function App() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [system, type, users, departments, incidents, openTickets] = await Promise.all([
+      const [system, type, users, departments, incidents, openCount] = await Promise.all([
         dashboardApi.getTicketsBySystem(filters),
         dashboardApi.getTicketsByType(filters),
         dashboardApi.getTopUsers(filters),
         dashboardApi.getTopDepartments(filters),
         dashboardApi.getIncidentsStatus(filters),
-        dashboardApi.getTicketList({ status: 'Abierto', page: 1, limit: 1 })
+        dashboardApi.getOpenTicketCount()
       ])
 
       setData({
@@ -48,7 +48,7 @@ function App() {
         topUsers: users.map((u: any) => ({ name: u.nombre, value: Number(u.cantidad) })),
         topDepartments: departments.map((d: any) => ({ name: d.nombre, value: Number(d.cantidad) })),
         incidentsStatus: incidents.map((i: any) => ({ name: i.estado, value: Number(i.cantidad), percentage: Number(i.porcentaje) })),
-        openTicketCount: openTickets.total || 0
+        openTicketCount: Number(openCount) || 0
       })
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -67,7 +67,7 @@ function App() {
   const statCards = [
     { label: 'Tickets Sistema', value: data.ticketsBySystem.reduce((s: number, i: any) => s + i.value, 0), icon: Ticket, color: 'blue' },
     { label: 'Tickets Abiertos', value: data.openTicketCount || 0, icon: AlertTriangle, color: 'indigo' },
-    { label: 'Usuarios Activos', value: data.topUsers.reduce((s: number, u: any) => s + u.value, 0), icon: Users, color: 'violet' },
+    { label: 'Agentes', value: 5, icon: Users, color: 'violet' },
   ]
 
   const colorMap: Record<string, string> = {

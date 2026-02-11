@@ -194,6 +194,15 @@ export class TicketService {
     return rows as FunctionalRequirement[];
   }
 
+  async getOpenTicketCount(): Promise<number> {
+    const [rows] = await pool.query<RowDataPacket[]>(`
+      SELECT COUNT(*) as total FROM ost_ticket t
+      JOIN ost_ticket_status ts ON t.status_id = ts.id
+      WHERE t.number >= 5000 AND ts.name = 'Open'
+    `);
+    return (rows[0] as any).total || 0;
+  }
+
   async getTicketList(params: {
     page?: number; limit?: number; search?: string;
     status?: string; tipificacion?: string; from?: string; to?: string;

@@ -117,6 +117,11 @@ export const dashboardApi = {
     return response.data.data
   },
 
+  getOpenTicketCount: async () => {
+    const response = await api.get('/open-ticket-count')
+    return response.data.data.total
+  },
+
   getTicketList: async (params: { page?: number; limit?: number; search?: string; status?: string; tipificacion?: string; from?: string; to?: string; year?: number; month?: number; day?: number }) => {
     const response = await api.get('/tickets', { params })
     return response.data.data
