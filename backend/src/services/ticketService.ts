@@ -126,14 +126,18 @@ export class TicketService {
     
     const query = `
       SELECT 
-        d.id as dept_id,
-        d.name as nombre,
-        COUNT(t.ticket_id) as cantidad,
-        ROUND((COUNT(t.ticket_id) * 100.0 / (SELECT COUNT(*) FROM ost_ticket t2 WHERE 1=1 ${clause})), 2) as porcentaje
+        li.id as dept_id,
+        li.value as nombre,
+        COUNT(DISTINCT t.ticket_id) as cantidad,
+        ROUND((COUNT(DISTINCT t.ticket_id) * 100.0 / (SELECT COUNT(*) FROM ost_ticket t2 WHERE 1=1 ${clause})), 2) as porcentaje
       FROM ost_ticket t
-      JOIN ost_department d ON t.dept_id = d.id
-      WHERE 1=1 ${clause}
-      GROUP BY d.id, d.name
+      JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
+      JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
+      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      WHERE fev.field_id = 61
+        AND fev.value IS NOT NULL AND fev.value != ''
+        ${clause}
+      GROUP BY li.id, li.value
       ORDER BY cantidad DESC
       LIMIT ?;
     `;
