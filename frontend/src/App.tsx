@@ -81,21 +81,19 @@ function App() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-slate-900 dark:text-white">Panel de Control — Soporte Funcional & Data</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Soporte Funcional & Data" className="h-8 dark:mix-blend-lighten invert dark:invert-0" />
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
           </button>
-          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* Filter Bar */}
-        <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
+        {/* Filter Bar + Logo */}
+        <div className="flex items-center gap-4">
+        <div className="flex-1 bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
           <div className="flex flex-wrap items-end gap-2">
             <Filter className="w-4 h-4 text-slate-400 mb-2" />
             <div>
@@ -131,6 +129,8 @@ function App() {
             <button onClick={loadData} className="px-4 py-1.5 text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium shadow-sm shadow-blue-500/20">Aplicar</button>
             <button onClick={() => { setFilters({}); setTimeout(loadData, 50); }} className="px-2 py-1.5 text-sm bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600/50 transition-all"><RotateCcw className="w-4 h-4" /></button>
           </div>
+        </div>
+        <img src="/logo.svg" alt="Soporte Funcional & Data" className="h-16 flex-shrink-0" />
         </div>
 
         {loading ? (
