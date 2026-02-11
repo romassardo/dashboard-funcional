@@ -211,8 +211,9 @@ export class TicketService {
       queryParams.push(s, s, s, s);
     }
     if (params.status) {
+      const statusMap: Record<string, string> = { 'Abierto': 'Open', 'Resuelto': 'Resolved', 'Cerrado': 'Closed' };
       conditions.push(`ts.name = ?`);
-      queryParams.push(params.status);
+      queryParams.push(statusMap[params.status] || params.status);
     }
     if (params.from && params.to) {
       conditions.push(`t.created BETWEEN ? AND ?`);
@@ -238,18 +239,26 @@ export class TicketService {
       SELECT 
         t.ticket_id, t.number,
         tc.subject as asunto,
-        COALESCE(sla.name, 'Sin SLA') as sla,
-        ts.name as estado,
+        CASE ts.name
+          WHEN 'Open' THEN 'Abierto'
+          WHEN 'Resolved' THEN 'Resuelto'
+          WHEN 'Closed' THEN 'Cerrado'
+          ELSE ts.name
+        END as estado,
         COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
         u.name as usuario,
-        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion
+        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion,
+        li_sector.value as sector
       FROM ost_ticket t
       LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
-      LEFT JOIN ost_sla sla ON t.sla_id = sla.id
       JOIN ost_ticket_status ts ON t.status_id = ts.id
       JOIN ost_user u ON t.user_id = u.id
       LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
+      LEFT JOIN ost_form_entry fe_s ON t.ticket_id = fe_s.object_id AND fe_s.object_type = 'T'
+      LEFT JOIN ost_form_entry_values fev_s ON fe_s.id = fev_s.entry_id AND fev_s.field_id = 61
+      LEFT JOIN ost_list_items li_sector ON fev_s.value LIKE CONCAT('%"', li_sector.id, '"%')
       ${where}
+      GROUP BY t.ticket_id
       ORDER BY t.created DESC
       LIMIT ${Number(limit)} OFFSET ${Number(offset)}
     `;

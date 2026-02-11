@@ -1,14 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { dashboardApi } from '../../services/api'
 import { TicketDetailModal } from './TicketDetailModal'
 import { Search, Filter, Loader2, ChevronLeft, ChevronRight, FileText, X } from 'lucide-react'
 
 const STATUS_COLORS: Record<string, string> = {
-  'Open': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  'Closed': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  'Resolved': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  'En curso': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  'Cumplido': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  'Abierto': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  'Cerrado': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  'Resuelto': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
 }
 
 export function TicketListPage() {
@@ -18,7 +16,7 @@ export function TicketListPage() {
   const [limit] = useState(50)
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
   const [statusFilter, setStatusFilter] = useState('')
   const [fromFilter, setFromFilter] = useState('')
   const [toFilter, setToFilter] = useState('')
@@ -45,18 +43,16 @@ export function TicketListPage() {
 
   useEffect(() => { loadTickets() }, [loadTickets])
 
-  const handleSearch = () => {
-    setSearch(searchInput)
-    setPage(1)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch()
+  const handleSearchChange = (value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setSearch(value)
+      setPage(1)
+    }, 400)
   }
 
   const clearFilters = () => {
     setSearch('')
-    setSearchInput('')
     setStatusFilter('')
     setFromFilter('')
     setToFilter('')
@@ -85,9 +81,8 @@ export function TicketListPage() {
             type="text"
             placeholder="Buscar por número, asunto, usuario, agente o sector"
             className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-slate-900 dark:text-white placeholder-slate-400"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleKeyDown}
+            defaultValue={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <button
@@ -106,9 +101,9 @@ export function TicketListPage() {
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Estado</label>
             <select className="px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg text-slate-900 dark:text-white" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}>
               <option value="">Todos</option>
-              <option value="Open">Open</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
+              <option value="Abierto">Abierto</option>
+              <option value="Resuelto">Resuelto</option>
+              <option value="Cerrado">Cerrado</option>
             </select>
           </div>
           <div>
@@ -140,12 +135,12 @@ export function TicketListPage() {
         </div>
 
         {/* Column Headers */}
-        <div className="grid grid-cols-[80px_1fr_130px_100px_160px_160px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20">
+        <div className="grid grid-cols-[80px_1fr_90px_140px_130px_140px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20">
           <div>Número</div>
           <div>Asunto</div>
-          <div>SLA</div>
           <div>Estado</div>
           <div>Agente</div>
+          <div>Sector</div>
           <div>Usuario</div>
         </div>
 
@@ -160,17 +155,17 @@ export function TicketListPage() {
             <div
               key={ticket.ticket_id}
               onClick={() => setSelectedTicketId(ticket.ticket_id)}
-              className="grid grid-cols-[80px_1fr_130px_100px_160px_160px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center"
+              className="grid grid-cols-[80px_1fr_90px_140px_130px_140px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center"
             >
               <div className="text-sm font-mono text-cyan-500">#{ticket.number}</div>
               <div className="text-sm text-slate-700 dark:text-slate-200 truncate">{ticket.asunto || '(sin asunto)'}</div>
               <div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">{ticket.sla}</span>
-              </div>
-              <div>
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[ticket.estado] || 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>{ticket.estado}</span>
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.agente}</div>
+              <div>
+                {ticket.sector && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 truncate inline-block max-w-full">{ticket.sector}</span>}
+              </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.usuario}</div>
             </div>
           ))}
