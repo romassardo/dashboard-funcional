@@ -93,7 +93,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* Filter Bar + Logo */}
         <div className="flex items-center gap-4">
-        <div className="flex-1 bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
+        <div className="flex-1 bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm min-w-0">
           <div className="flex flex-wrap items-end gap-2">
             <Filter className="w-4 h-4 text-slate-400 mb-2" />
             <div>
@@ -130,7 +130,17 @@ function App() {
             <button onClick={() => { setFilters({}); setTimeout(loadData, 50); }} className="px-2 py-1.5 text-sm bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600/50 transition-all"><RotateCcw className="w-4 h-4" /></button>
           </div>
         </div>
-        <img src="/logo.svg" alt="Soporte Funcional & Data" className="h-16 flex-shrink-0" />
+        <div className="flex-shrink-0 flex flex-col items-center gap-0.5 px-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">SOPORTE</p>
+              <p className="text-[10px] font-semibold text-blue-500 tracking-wider leading-tight">FUNCIONAL & DATA</p>
+            </div>
+          </div>
+        </div>
         </div>
 
         {loading ? (
