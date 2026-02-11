@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import metricsRoutes from './routes/metricsRoutes';
@@ -8,11 +9,32 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000');
 
+app.use(compression());
+
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
 }));
 
 app.use(express.json());
+
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000;
+
+app.use('/api/metrics', (req, res, next) => {
+  const key = req.originalUrl;
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return res.json(cached.data);
+  }
+  const originalJson = res.json.bind(res);
+  res.json = (body: any) => {
+    if (res.statusCode === 200) {
+      cache.set(key, { data: body, timestamp: Date.now() });
+    }
+    return originalJson(body);
+  };
+  next();
+});
 
 app.use('/api/metrics', metricsRoutes);
 

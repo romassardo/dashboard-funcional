@@ -61,7 +61,7 @@ export class TicketService {
       ORDER BY cantidad DESC;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, [...params, ...params]);
+    const [rows] = await pool.execute<RowDataPacket[]>(query, [...params, ...params]);
     return rows as TicketsBySystem[];
   }
 
@@ -85,7 +85,7 @@ export class TicketService {
       ORDER BY cantidad DESC;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, [...params, ...params]);
+    const [rows] = await pool.execute<RowDataPacket[]>(query, [...params, ...params]);
     return rows as TicketsByType[];
   }
 
@@ -110,15 +110,8 @@ export class TicketService {
       LIMIT ?;
     `;
     
-    console.log('DEBUG getTopUsers query:', query);
-    console.log('DEBUG getTopUsers params:', [...params, limit]);
-    try {
-      const [rows] = await pool.query<RowDataPacket[]>(query, [...params, limit]);
-      return rows as TopUser[];
-    } catch (err) {
-      console.error('DEBUG SQL ERROR:', err);
-      throw err;
-    }
+    const [rows] = await pool.execute<RowDataPacket[]>(query, [...params, limit]);
+    return rows as TopUser[];
   }
 
   async getTopDepartments(filters: DateFilter, limit: number = 5): Promise<TopDepartment[]> {
@@ -142,7 +135,7 @@ export class TicketService {
       LIMIT ?;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, [...params, ...params, limit]);
+    const [rows] = await pool.execute<RowDataPacket[]>(query, [...params, ...params, limit]);
     return rows as TopDepartment[];
   }
 
@@ -171,7 +164,7 @@ export class TicketService {
       ORDER BY t.status_id;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, [...params, ...params]);
+    const [rows] = await pool.execute<RowDataPacket[]>(query, [...params, ...params]);
     return rows as IncidentStatus[];
   }
 
@@ -197,7 +190,7 @@ export class TicketService {
       ORDER BY t.created DESC;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, params);
+    const [rows] = await pool.execute<RowDataPacket[]>(query, params);
     return rows as FunctionalRequirement[];
   }
 
@@ -222,7 +215,7 @@ export class TicketService {
       ${sectorFilter.join}
       WHERE t.number >= 5000 AND fev.field_id = 61
         AND fev.value IS NOT NULL AND fev.value != ''
-        AND YEAR(t.created) = ? AND MONTH(t.created) = ?
+        AND t.created >= ? AND t.created < ?
       GROUP BY li.id, li.value ORDER BY cantidad DESC;
     `;
 
@@ -237,7 +230,7 @@ export class TicketService {
       WHERE t.number >= 5000 AND fev.field_id = 57
         AND li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
-        AND YEAR(t.created) = ? AND MONTH(t.created) = ?
+        AND t.created >= ? AND t.created < ?
       GROUP BY li.value, li.id ORDER BY cantidad DESC;
     `;
 
@@ -252,13 +245,20 @@ export class TicketService {
       WHERE t.number >= 5000 AND fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
-        AND YEAR(t.created) = ? AND MONTH(t.created) = ?
+        AND t.created >= ? AND t.created < ?
       GROUP BY li.value, li.id ORDER BY cantidad DESC;
     `;
 
-    const [sectorRows] = await pool.query<RowDataPacket[]>(sectorQuery, [...sectorFilter.params, year, month]);
-    const [tipoRows] = await pool.query<RowDataPacket[]>(tipoQuery, [...tipoFilter.params, year, month]);
-    const [sistemaRows] = await pool.query<RowDataPacket[]>(sistemaQuery, [...sistemaFilter.params, year, month]);
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+
+    const [sectorRows, tipoRows, sistemaRows] = await Promise.all([
+      pool.execute<RowDataPacket[]>(sectorQuery, [...sectorFilter.params, startDate, endDate]),
+      pool.execute<RowDataPacket[]>(tipoQuery, [...tipoFilter.params, startDate, endDate]),
+      pool.execute<RowDataPacket[]>(sistemaQuery, [...sistemaFilter.params, startDate, endDate])
+    ]).then(results => results.map(r => r[0]));
 
     return {
       mes: month,
