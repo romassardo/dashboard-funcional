@@ -22,7 +22,12 @@ echo ""
 # Instalar dependencias del backend
 echo "📦 Instalando dependencias del backend..."
 cd backend
-npm install --production
+npm install
+echo ""
+
+# Compilar backend TypeScript
+echo "🔨 Compilando backend..."
+npx tsc
 echo ""
 
 # Instalar dependencias del frontend
@@ -36,13 +41,10 @@ echo "🔨 Compilando frontend..."
 npm run build
 echo ""
 
-# Reiniciar backend (si usa PM2 o similar)
+# Reiniciar backend
 echo "🔄 Reiniciando servicios..."
 cd ../backend
-# Descomentar según tu gestor de procesos:
-# pm2 restart dashboard-backend
-# systemctl restart dashboard-backend
-echo "   (reinicio manual requerido)"
+pm2 restart dashboard-backend 2>/dev/null || echo "   PM2: iniciar manualmente"
 echo ""
 
 echo "=========================================="
