@@ -33,3 +33,14 @@ coverage/
 # Temporary files
 *.tmp
 .cache/
+
+# Binary documents
+*.docx
+*.xlsx
+*.pdf
+
+# Debug/temp SQL
+*.sql
+
+# Extracted text files
+extracted*.txt

@@ -4,114 +4,75 @@ import { DateFilter } from '../types/ticket.types';
 
 const ticketService = new TicketService();
 
+function parseFilters(query: Request['query']): DateFilter {
+  return {
+    from: query.from as string,
+    to: query.to as string,
+    year: query.year ? parseInt(query.year as string) : undefined,
+    month: query.month ? parseInt(query.month as string) : undefined,
+    day: query.day ? parseInt(query.day as string) : undefined
+  };
+}
+
+function handleError(res: Response, method: string, message: string, error: unknown): void {
+  console.error(`Error in ${method}:`, error);
+  res.status(500).json({ success: false, error: message });
+}
+
 export class MetricsController {
   async getTicketsBySystem(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
-
-      const data = await ticketService.getTicketsBySystem(filters);
+      const data = await ticketService.getTicketsBySystem(parseFilters(req.query));
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getTicketsBySystem:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener tickets por sistema' });
+      handleError(res, 'getTicketsBySystem', 'Error al obtener tickets por sistema', error);
     }
   }
 
   async getTicketsByType(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
-
-      const data = await ticketService.getTicketsByType(filters);
+      const data = await ticketService.getTicketsByType(parseFilters(req.query));
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getTicketsByType:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener tickets por tipificación' });
+      handleError(res, 'getTicketsByType', 'Error al obtener tickets por tipificación', error);
     }
   }
 
   async getTopUsers(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
-
-      const data = await ticketService.getTopUsers(filters, limit);
+      const data = await ticketService.getTopUsers(parseFilters(req.query), limit);
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getTopUsers:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener top usuarios' });
+      handleError(res, 'getTopUsers', 'Error al obtener top usuarios', error);
     }
   }
 
   async getTopDepartments(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
-
-      const data = await ticketService.getTopDepartments(filters, limit);
+      const data = await ticketService.getTopDepartments(parseFilters(req.query), limit);
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getTopDepartments:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener top departamentos' });
+      handleError(res, 'getTopDepartments', 'Error al obtener top departamentos', error);
     }
   }
 
   async getIncidentsStatus(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
-
-      const data = await ticketService.getIncidentsStatus(filters);
+      const data = await ticketService.getIncidentsStatus(parseFilters(req.query));
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getIncidentsStatus:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener estado de incidentes' });
+      handleError(res, 'getIncidentsStatus', 'Error al obtener estado de incidentes', error);
     }
   }
 
   async getFunctionalRequirements(req: Request, res: Response): Promise<void> {
     try {
-      const filters: DateFilter = {
-        from: req.query.from as string,
-        to: req.query.to as string,
-        year: req.query.year ? parseInt(req.query.year as string) : undefined,
-        month: req.query.month ? parseInt(req.query.month as string) : undefined,
-        day: req.query.day ? parseInt(req.query.day as string) : undefined
-      };
-
-      const data = await ticketService.getFunctionalRequirements(filters);
+      const data = await ticketService.getFunctionalRequirements(parseFilters(req.query));
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getFunctionalRequirements:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener requerimientos funcionales' });
+      handleError(res, 'getFunctionalRequirements', 'Error al obtener requerimientos funcionales', error);
     }
   }
 
@@ -128,8 +89,7 @@ export class MetricsController {
       const data = await ticketService.getMonthlySummary(year, month);
       res.json({ success: true, data });
     } catch (error) {
-      console.error('Error in getMonthlySummary:', error);
-      res.status(500).json({ success: false, error: 'Error al obtener resumen mensual' });
+      handleError(res, 'getMonthlySummary', 'Error al obtener resumen mensual', error);
     }
   }
 }

@@ -15,7 +15,3 @@ export function formatDate(date: string | null): string {
     minute: '2-digit'
   })
 }
-
-export function formatPercentage(value: number): string {
-  return `${value.toFixed(2)}%`
-}
