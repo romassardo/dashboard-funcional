@@ -38,11 +38,12 @@ cat > backend/.env << EOF
 PORT=3000
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=powerbi
-DB_PASSWORD=Diego2024@
+DB_USER=<DB_USER>
+DB_PASSWORD=<DB_PASSWORD>
 DB_NAME=funcional
 CORS_ORIGIN=*
 EOF
+# Reemplazar <DB_USER> y <DB_PASSWORD> con las credenciales reales
 ```
 
 **Frontend** (`/var/www/dashboard-funcional/frontend/.env`):

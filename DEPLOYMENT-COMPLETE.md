@@ -40,7 +40,7 @@
 │  ┌──────────────────────────────────────────────────┐   │
 │  │  MySQL (Puerto 3306)                              │   │
 │  │  - Base de datos: funcional                       │   │
-│  │  - Usuario: powerbi                               │   │
+│  │  - Usuario: (ver .env)                              │   │
 │  └──────────────────────────────────────────────────┘   │
 │                                                           │
 └─────────────────────────────────────────────────────────┘
@@ -156,7 +156,7 @@ curl http://10.12.32.4/api/metrics/tickets-by-system
 - **Host**: localhost (desde el servidor)
 - **Puerto**: 3306
 - **Base de datos**: funcional
-- **Usuario**: powerbi
+- **Usuario**: (ver archivo .env)
 - **Conexión**: Directa desde el backend en el mismo servidor
 
 ---

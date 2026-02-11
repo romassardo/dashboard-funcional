@@ -41,15 +41,10 @@ Dashboard ultra-moderno para visualizar métricas de la ticketera OsTicket del s
 cd backend
 ```
 
-2. Las dependencias ya están instaladas. Variables de entorno en `.env`:
-```env
-PORT=3000
-DB_HOST=10.12.32.4
-DB_PORT=3306
-DB_USER=powerbi
-DB_PASSWORD=Diego2024@
-DB_NAME=funcional
-CORS_ORIGIN=http://localhost:5173
+2. Las dependencias ya están instaladas. Copiar el archivo de ejemplo y completar las credenciales:
+```bash
+cp .env.example backend/.env
+# Editar backend/.env con las credenciales reales
 ```
 
 3. Iniciar el servidor:
@@ -196,7 +191,7 @@ La base de datos MySQL no es accesible directamente desde Windows. Necesitas cre
 ```powershell
 .\start-tunnel.ps1
 ```
-Ingresar contraseña cuando se solicite: `Samsung2026$`
+Ingresar contraseña SSH cuando se solicite.
 **Dejar esta terminal abierta**
 
 **Terminal 2** - Iniciar dashboard:
@@ -208,8 +203,8 @@ Ingresar contraseña cuando se solicite: `Samsung2026$`
 
 **Terminal 1** - Túnel SSH:
 ```bash
-ssh -L 3307:localhost:3306 soporte@10.12.32.4 -N
-# Contraseña: Samsung2026$
+ssh -L 3307:localhost:3306 soporte@<SERVER_IP> -N
+# Ingresar contraseña SSH cuando se solicite
 # Dejar abierto
 ```
 
@@ -252,7 +247,7 @@ Deberías ver `TcpTestSucceeded : True`
 ### Backend no conecta a MySQL
 - Verificar credenciales en `.env`
 - Verificar que MySQL esté accesible desde la red
-- Probar conexión: `mysql -h 10.12.32.4 -u powerbi -p`
+- Probar conexión: `mysql -h <DB_HOST> -u <DB_USER> -p`
 
 ### Frontend no carga datos
 - Verificar que el backend esté corriendo en puerto 3000
