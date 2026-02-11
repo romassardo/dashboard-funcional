@@ -19,6 +19,19 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1048576).toFixed(1)} MB`
 }
 
+function parseFieldValue(value: string | null): string {
+  if (!value || value === 'null' || value === '0') return ''
+  try {
+    const parsed = JSON.parse(value)
+    if (typeof parsed === 'object' && parsed !== null) {
+      return Object.values(parsed).filter(Boolean).join(', ')
+    }
+    return String(parsed)
+  } catch {
+    return value
+  }
+}
+
 export function TicketDetailModal({ ticketId, onClose }: Props) {
   const [ticket, setTicket] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -89,19 +102,24 @@ export function TicketDetailModal({ ticketId, onClose }: Props) {
               </div>
 
               {/* Form Fields */}
-              {ticket.fields && ticket.fields.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Campos del formulario</h3>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg divide-y divide-slate-200/50 dark:divide-slate-700/30">
-                    {ticket.fields.map((f: any, i: number) => (
-                      <div key={i} className="flex gap-4 px-4 py-2">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-40 flex-shrink-0">{f.label}</span>
-                        <span className="text-xs text-slate-700 dark:text-slate-200 break-all">{f.value || '—'}</span>
-                      </div>
-                    ))}
+              {ticket.fields && ticket.fields.length > 0 && (() => {
+                const cleanFields = ticket.fields
+                  .map((f: any) => ({ label: f.label, value: parseFieldValue(f.value) }))
+                  .filter((f: any) => f.value && f.value.trim() !== '')
+                return cleanFields.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Campos del formulario</h3>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg divide-y divide-slate-200/50 dark:divide-slate-700/30">
+                      {cleanFields.map((f: any, i: number) => (
+                        <div key={i} className="flex gap-4 px-4 py-2">
+                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-40 flex-shrink-0">{f.label}</span>
+                          <span className="text-xs text-slate-700 dark:text-slate-200 break-all">{f.value}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null
+              })()}
 
               {/* Thread */}
               {ticket.thread && ticket.thread.length > 0 && (
