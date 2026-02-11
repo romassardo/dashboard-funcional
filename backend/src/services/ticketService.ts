@@ -200,7 +200,7 @@ export class TicketService {
       JOIN ost_ticket_status ts ON t.status_id = ts.id
       WHERE t.number >= 5000 AND ts.name = 'Open'
     `);
-    return (rows[0] as any).total || 0;
+    return Number((rows[0] as any).total) || 0;
   }
 
   async getTicketList(params: {
