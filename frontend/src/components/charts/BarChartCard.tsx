@@ -6,6 +6,7 @@ interface BarChartCardProps {
   color: string
   layout?: 'horizontal' | 'vertical'
   showPercentage?: boolean
+  totalForPercentage?: number
 }
 
 const CustomBarTooltip = ({ active, payload, label }: any) => {
@@ -20,8 +21,8 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null
 }
 
-export function BarChartCard({ title, data, color, layout = 'horizontal', showPercentage = false }: BarChartCardProps) {
-  const total = showPercentage ? data.reduce((s, i) => s + i.value, 0) : 0
+export function BarChartCard({ title, data, color, layout = 'horizontal', showPercentage = false, totalForPercentage }: BarChartCardProps) {
+  const total = showPercentage ? (totalForPercentage || data.reduce((s, i) => s + i.value, 0)) : 0
   const isVertical = layout === 'vertical'
   const chartHeight = isVertical ? Math.max(250, data.length * 45) : 280
 

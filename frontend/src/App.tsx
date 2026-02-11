@@ -190,6 +190,7 @@ function App() {
               data={data.topDepartments}
               color={COLORS.departments}
               showPercentage
+              totalForPercentage={data.ticketsBySystem.reduce((s: number, i: any) => s + i.value, 0)}
             />
 
             {/* Monthly Summary */}
