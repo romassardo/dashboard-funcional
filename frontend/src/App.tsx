@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
-import { RequirementsTable } from './components/tables/RequirementsTable'
+import { MonthlySummaryCard } from './components/tables/MonthlySummaryCard'
 import { BarChart3, Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, Building2, AlertTriangle } from 'lucide-react'
 
 function App() {
@@ -18,7 +18,6 @@ function App() {
     topUsers: [],
     topDepartments: [],
     incidentsStatus: [],
-    functionalRequirements: []
   })
 
   const COLORS = {
@@ -32,13 +31,12 @@ function App() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [system, type, users, departments, incidents, requirements] = await Promise.all([
+      const [system, type, users, departments, incidents] = await Promise.all([
         dashboardApi.getTicketsBySystem(filters),
         dashboardApi.getTicketsByType(filters),
         dashboardApi.getTopUsers(filters),
         dashboardApi.getTopDepartments(filters),
-        dashboardApi.getIncidentsStatus(filters),
-        dashboardApi.getFunctionalRequirements(filters)
+        dashboardApi.getIncidentsStatus(filters)
       ])
 
       setData({
@@ -46,8 +44,7 @@ function App() {
         ticketsByType: type.map((t: any) => ({ name: t.tipificacion, value: Number(t.cantidad), percentage: Number(t.porcentaje) })),
         topUsers: users.map((u: any) => ({ name: u.nombre, value: Number(u.cantidad) })),
         topDepartments: departments.map((d: any) => ({ name: d.nombre, value: Number(d.cantidad) })),
-        incidentsStatus: incidents.map((i: any) => ({ name: i.estado, value: Number(i.cantidad), percentage: Number(i.porcentaje) })),
-        functionalRequirements: requirements
+        incidentsStatus: incidents.map((i: any) => ({ name: i.estado, value: Number(i.cantidad), percentage: Number(i.porcentaje) }))
       })
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -201,8 +198,8 @@ function App() {
               color={COLORS.departments}
             />
 
-            {/* Requirements Table */}
-            <RequirementsTable requirements={data.functionalRequirements} />
+            {/* Monthly Summary */}
+            <MonthlySummaryCard />
           </>
         )}
 

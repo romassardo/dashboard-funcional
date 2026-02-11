@@ -205,12 +205,16 @@ export class TicketService {
     const query = `
       SELECT 
         'por_sector' as tipo,
-        d.name as valor,
-        COUNT(t.ticket_id) as cantidad
+        li.value as valor,
+        COUNT(DISTINCT t.ticket_id) as cantidad
       FROM ost_ticket t
-      JOIN ost_department d ON t.dept_id = d.id
-      WHERE t.number >= 5000 AND YEAR(t.created) = ? AND MONTH(t.created) = ?
-      GROUP BY d.name
+      JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
+      JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
+      WHERE t.number >= 5000 AND fev.field_id = 61
+        AND fev.value IS NOT NULL AND fev.value != ''
+        AND YEAR(t.created) = ? AND MONTH(t.created) = ?
+      GROUP BY li.id, li.value
       
       UNION ALL
       
