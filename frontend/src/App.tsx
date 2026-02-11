@@ -3,7 +3,7 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { MonthlySummaryCard } from './components/tables/MonthlySummaryCard'
-import { BarChart3, Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, AlertTriangle } from 'lucide-react'
+import { Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, AlertTriangle } from 'lucide-react'
 
 function App() {
   const [filters, setFilters] = useState<DateFilter>({})
@@ -79,13 +79,7 @@ function App() {
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <BarChart3 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white">Soporte Funcional</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Panel de Control</p>
-            </div>
+            <img src="/logo.png" alt="Soporte Funcional & Data" className="h-10 dark:brightness-100 brightness-0" />
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
