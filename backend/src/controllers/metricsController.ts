@@ -76,6 +76,52 @@ export class MetricsController {
     }
   }
 
+  async getTicketList(req: Request, res: Response): Promise<void> {
+    try {
+      const data = await ticketService.getTicketList({
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        search: req.query.search as string,
+        status: req.query.status as string,
+        from: req.query.from as string,
+        to: req.query.to as string,
+        year: req.query.year ? parseInt(req.query.year as string) : undefined,
+        month: req.query.month ? parseInt(req.query.month as string) : undefined,
+        day: req.query.day ? parseInt(req.query.day as string) : undefined,
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      handleError(res, 'getTicketList', 'Error al obtener listado de tickets', error);
+    }
+  }
+
+  async getTicketDetail(req: Request, res: Response): Promise<void> {
+    try {
+      const ticketId = parseInt(req.params.ticketId);
+      if (!ticketId) { res.status(400).json({ success: false, error: 'ticketId inválido' }); return; }
+      const data = await ticketService.getTicketDetail(ticketId);
+      if (!data) { res.status(404).json({ success: false, error: 'Ticket no encontrado' }); return; }
+      res.json({ success: true, data });
+    } catch (error) {
+      handleError(res, 'getTicketDetail', 'Error al obtener detalle del ticket', error);
+    }
+  }
+
+  async getAttachment(req: Request, res: Response): Promise<void> {
+    try {
+      const fileId = parseInt(req.params.fileId);
+      if (!fileId) { res.status(400).json({ success: false, error: 'fileId inválido' }); return; }
+      const file = await ticketService.getAttachmentFile(fileId);
+      if (!file) { res.status(404).json({ success: false, error: 'Archivo no encontrado' }); return; }
+      res.setHeader('Content-Type', file.type);
+      res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.name)}"`);
+      res.setHeader('Content-Length', file.data.length);
+      res.send(file.data);
+    } catch (error) {
+      handleError(res, 'getAttachment', 'Error al obtener archivo adjunto', error);
+    }
+  }
+
   async getMonthlySummary(req: Request, res: Response): Promise<void> {
     try {
       const year = parseInt(req.query.year as string);

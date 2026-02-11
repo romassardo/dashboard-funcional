@@ -3,9 +3,11 @@ import { dashboardApi, DateFilter } from './services/api'
 import { PieChartCard } from './components/charts/PieChartCard'
 import { BarChartCard } from './components/charts/BarChartCard'
 import { MonthlySummaryCard } from './components/tables/MonthlySummaryCard'
-import { Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, AlertTriangle } from 'lucide-react'
+import { TicketListPage } from './components/tickets/TicketListPage'
+import { Loader2, Moon, Sun, Filter, RotateCcw, Ticket, Users, AlertTriangle, LayoutDashboard, FileText } from 'lucide-react'
 
 function App() {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'tickets'>('dashboard')
   const [filters, setFilters] = useState<DateFilter>({})
   const [loading, setLoading] = useState(false)
   const [darkMode, setDarkMode] = useState(() => {
@@ -78,8 +80,16 @@ function App() {
       {/* Header */}
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Panel de Control — Soporte Funcional & Data</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Panel de Control</h1>
+            <nav className="flex gap-1">
+              <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-1.5 transition-all ${activeTab === 'dashboard' ? 'bg-blue-500/10 text-blue-500 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </button>
+              <button onClick={() => setActiveTab('tickets')} className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-1.5 transition-all ${activeTab === 'tickets' ? 'bg-blue-500/10 text-blue-500 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                <FileText className="w-4 h-4" /> Tickets
+              </button>
+            </nav>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
@@ -91,6 +101,10 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {activeTab === 'tickets' ? (
+          <TicketListPage />
+        ) : (
+        <>
         {/* Filter Bar + Logo */}
         <div className="flex items-center gap-4">
         <div className="flex-1 bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm min-w-0">
@@ -210,6 +224,8 @@ function App() {
             <MonthlySummaryCard />
           </>
         )}
+
+        </>)}
 
         {/* Footer */}
         <footer className="text-center text-xs text-slate-400 dark:text-slate-500 py-4 border-t border-slate-200/50 dark:border-slate-700/30">

@@ -117,6 +117,20 @@ export const dashboardApi = {
     return response.data.data
   },
 
+  getTicketList: async (params: { page?: number; limit?: number; search?: string; status?: string; from?: string; to?: string; year?: number; month?: number; day?: number }) => {
+    const response = await api.get('/tickets', { params })
+    return response.data.data
+  },
+
+  getTicketDetail: async (ticketId: number) => {
+    const response = await api.get(`/tickets/${ticketId}`)
+    return response.data.data
+  },
+
+  getAttachmentUrl: (fileId: number) => {
+    return `${API_BASE_URL}/api/metrics/attachments/${fileId}`
+  },
+
   getMonthlySummary: async (year: number, month: number, filterField?: number, filterItemId?: number) => {
     const params: any = { year, month };
     if (filterField && filterItemId) {

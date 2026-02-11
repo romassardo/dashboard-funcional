@@ -194,6 +194,171 @@ export class TicketService {
     return rows as FunctionalRequirement[];
   }
 
+  async getTicketList(params: {
+    page?: number; limit?: number; search?: string;
+    status?: string; from?: string; to?: string;
+    year?: number; month?: number; day?: number;
+  }): Promise<{ tickets: any[]; total: number; page: number; limit: number }> {
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 100, 500);
+    const offset = (page - 1) * limit;
+    const conditions: string[] = ['t.number >= 5000'];
+    const queryParams: any[] = [];
+
+    if (params.search) {
+      conditions.push(`(t.number LIKE ? OR tc.subject LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ?)`);
+      const s = `%${params.search}%`;
+      queryParams.push(s, s, s, s);
+    }
+    if (params.status) {
+      conditions.push(`ts.name = ?`);
+      queryParams.push(params.status);
+    }
+    if (params.from && params.to) {
+      conditions.push(`t.created BETWEEN ? AND ?`);
+      queryParams.push(params.from, `${params.to} 23:59:59`);
+    }
+    if (params.year) { conditions.push(`YEAR(t.created) = ?`); queryParams.push(params.year); }
+    if (params.month) { conditions.push(`MONTH(t.created) = ?`); queryParams.push(params.month); }
+    if (params.day) { conditions.push(`DAY(t.created) = ?`); queryParams.push(params.day); }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM ost_ticket t
+      LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
+      JOIN ost_ticket_status ts ON t.status_id = ts.id
+      JOIN ost_user u ON t.user_id = u.id
+      LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
+      ${where}
+    `;
+
+    const listQuery = `
+      SELECT 
+        t.ticket_id, t.number,
+        tc.subject as asunto,
+        COALESCE(sla.name, 'Sin SLA') as sla,
+        ts.name as estado,
+        COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
+        u.name as usuario,
+        DATE_FORMAT(t.created, '%Y-%m-%d %H:%i') as fecha_creacion,
+        (SELECT li.value FROM ost_form_entry fe
+         JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
+         JOIN ost_list_items li ON fev.value LIKE CONCAT('%"', li.id, '"%')
+         WHERE fe.object_id = t.ticket_id AND fe.object_type = 'T' AND fev.field_id = 61
+         LIMIT 1) as sector
+      FROM ost_ticket t
+      LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
+      LEFT JOIN ost_sla sla ON t.sla_id = sla.id
+      JOIN ost_ticket_status ts ON t.status_id = ts.id
+      JOIN ost_user u ON t.user_id = u.id
+      LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
+      ${where}
+      ORDER BY t.created DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, queryParams);
+    const [rows] = await pool.execute<RowDataPacket[]>(listQuery, [...queryParams, limit, offset]);
+
+    return { tickets: rows as any[], total: (countRows[0] as any).total, page, limit };
+  }
+
+  async getTicketDetail(ticketId: number): Promise<any> {
+    const ticketQuery = `
+      SELECT 
+        t.ticket_id, t.number, t.created, t.updated, t.closed, t.isoverdue,
+        tc.subject as asunto,
+        COALESCE(sla.name, 'Sin SLA') as sla,
+        ts.name as estado,
+        d.name as departamento,
+        COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
+        u.name as usuario,
+        ue.address as usuario_email
+      FROM ost_ticket t
+      LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
+      LEFT JOIN ost_sla sla ON t.sla_id = sla.id
+      JOIN ost_ticket_status ts ON t.status_id = ts.id
+      LEFT JOIN ost_department d ON t.dept_id = d.id
+      JOIN ost_user u ON t.user_id = u.id
+      LEFT JOIN ost_user_email ue ON u.id = ue.user_id
+      LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
+      WHERE t.ticket_id = ?
+    `;
+
+    const formFieldsQuery = `
+      SELECT ff.label, fev.value, ff.type
+      FROM ost_form_entry fe
+      JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
+      JOIN ost_form_field ff ON fev.field_id = ff.id
+      WHERE fe.object_id = ? AND fe.object_type = 'T'
+      ORDER BY ff.sort
+    `;
+
+    const threadQuery = `
+      SELECT 
+        te.id, te.type, te.title, te.body, te.poster,
+        DATE_FORMAT(te.created, '%Y-%m-%d %H:%i') as created,
+        CASE WHEN te.staff_id > 0 THEN CONCAT(s.firstname, ' ', s.lastname) ELSE u.name END as author
+      FROM ost_thread th
+      JOIN ost_thread_entry te ON th.id = te.thread_id
+      LEFT JOIN ost_staff s ON te.staff_id = s.staff_id
+      LEFT JOIN ost_user u ON te.user_id = u.id
+      WHERE th.object_id = ? AND th.object_type = 'T'
+      ORDER BY te.created ASC
+    `;
+
+    const attachmentsQuery = `
+      SELECT 
+        a.object_id as thread_entry_id,
+        f.id as file_id, f.name, f.type as mime_type, f.size
+      FROM ost_thread th
+      JOIN ost_thread_entry te ON th.id = te.thread_id
+      JOIN ost_attachment a ON te.id = a.object_id AND a.type = 'H'
+      JOIN ost_file f ON a.file_id = f.id
+      WHERE th.object_id = ? AND th.object_type = 'T'
+    `;
+
+    const [[ticket], [fields], [threads], [attachments]] = await Promise.all([
+      pool.execute<RowDataPacket[]>(ticketQuery, [ticketId]),
+      pool.execute<RowDataPacket[]>(formFieldsQuery, [ticketId]),
+      pool.execute<RowDataPacket[]>(threadQuery, [ticketId]),
+      pool.execute<RowDataPacket[]>(attachmentsQuery, [ticketId])
+    ]);
+
+    if (!ticket.length) return null;
+
+    const attachmentMap: Record<number, any[]> = {};
+    (attachments as any[]).forEach((a: any) => {
+      if (!attachmentMap[a.thread_entry_id]) attachmentMap[a.thread_entry_id] = [];
+      attachmentMap[a.thread_entry_id].push({ file_id: a.file_id, name: a.name, mime_type: a.mime_type, size: a.size });
+    });
+
+    const threadEntries = (threads as any[]).map((t: any) => ({
+      ...t,
+      attachments: attachmentMap[t.id] || []
+    }));
+
+    return { ...ticket[0], fields, thread: threadEntries };
+  }
+
+  async getAttachmentFile(fileId: number): Promise<{ name: string; type: string; data: Buffer } | null> {
+    const [fileRows] = await pool.execute<RowDataPacket[]>(
+      'SELECT name, type, size FROM ost_file WHERE id = ?', [fileId]
+    );
+    if (!(fileRows as any[]).length) return null;
+    const file = (fileRows as any[])[0];
+
+    const [chunkRows] = await pool.execute<RowDataPacket[]>(
+      'SELECT filedata FROM ost_file_chunk WHERE file_id = ? ORDER BY chunk_id ASC', [fileId]
+    );
+    const chunks = (chunkRows as any[]).map((c: any) => c.filedata);
+    const data = Buffer.concat(chunks);
+
+    return { name: file.name, type: file.type, data };
+  }
+
   async getMonthlySummary(year: number, month: number, filterField?: number, filterItemId?: number): Promise<any> {
     const buildFilterJoin = (currentField: number): { join: string; params: any[] } => {
       if (!filterField || !filterItemId || filterField === currentField) {
