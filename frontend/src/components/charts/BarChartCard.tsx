@@ -1,10 +1,11 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
 interface BarChartCardProps {
   title: string
   data: Array<{ name: string; value: number }>
   color: string
   layout?: 'horizontal' | 'vertical'
+  showPercentage?: boolean
 }
 
 const CustomBarTooltip = ({ active, payload, label }: any) => {
@@ -19,7 +20,8 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null
 }
 
-export function BarChartCard({ title, data, color, layout = 'horizontal' }: BarChartCardProps) {
+export function BarChartCard({ title, data, color, layout = 'horizontal', showPercentage = false }: BarChartCardProps) {
+  const total = showPercentage ? data.reduce((s, i) => s + i.value, 0) : 0
   const isVertical = layout === 'vertical'
   const chartHeight = isVertical ? Math.max(250, data.length * 45) : 280
 
@@ -67,7 +69,17 @@ export function BarChartCard({ title, data, color, layout = 'horizontal' }: BarC
             fill={color} 
             radius={isVertical ? [0, 4, 4, 0] : [4, 4, 0, 0]}
             maxBarSize={32}
-          />
+          >
+            {showPercentage && (
+              <LabelList
+                dataKey="value"
+                position={isVertical ? 'right' : 'top'}
+                formatter={(val: number) => `${((val / total) * 100).toFixed(1)}%`}
+                fill="#94a3b8"
+                fontSize={11}
+              />
+            )}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

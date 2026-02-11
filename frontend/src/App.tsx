@@ -21,7 +21,7 @@ function App() {
   })
 
   const COLORS = {
-    system: ['#3B82F6', '#6366F1', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE'],
+    system: ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#06B6D4'],
     type: ['#3B82F6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'],
     status: ['#10B981', '#F59E0B', '#EF4444'],
     users: '#6366F1',
@@ -189,6 +189,7 @@ function App() {
               title="Top 5 Departamentos con más Tickets"
               data={data.topDepartments}
               color={COLORS.departments}
+              showPercentage
             />
 
             {/* Monthly Summary */}
