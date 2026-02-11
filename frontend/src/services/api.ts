@@ -117,10 +117,15 @@ export const dashboardApi = {
     return response.data.data
   },
 
-  getMonthlySummary: async (year: number, month: number) => {
+  getMonthlySummary: async (year: number, month: number, filterField?: number, filterItemId?: number) => {
+    const params: any = { year, month };
+    if (filterField && filterItemId) {
+      params.filterField = filterField;
+      params.filterItemId = filterItemId;
+    }
     const response = await api.get<{ success: boolean; data: MonthlySummary }>(
       '/monthly-summary',
-      { params: { year, month } }
+      { params }
     )
     return response.data.data
   }

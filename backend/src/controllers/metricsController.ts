@@ -86,7 +86,9 @@ export class MetricsController {
         return;
       }
 
-      const data = await ticketService.getMonthlySummary(year, month);
+      const filterField = req.query.filterField ? parseInt(req.query.filterField as string) : undefined;
+      const filterItemId = req.query.filterItemId ? parseInt(req.query.filterItemId as string) : undefined;
+      const data = await ticketService.getMonthlySummary(year, month, filterField, filterItemId);
       res.json({ success: true, data });
     } catch (error) {
       handleError(res, 'getMonthlySummary', 'Error al obtener resumen mensual', error);

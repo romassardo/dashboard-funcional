@@ -201,64 +201,71 @@ export class TicketService {
     return rows as FunctionalRequirement[];
   }
 
-  async getMonthlySummary(year: number, month: number): Promise<any> {
-    const query = `
-      SELECT 
-        'por_sector' as tipo,
-        li.value as valor,
-        COUNT(DISTINCT t.ticket_id) as cantidad
+  async getMonthlySummary(year: number, month: number, filterField?: number, filterItemId?: number): Promise<any> {
+    const buildFilterJoin = (currentField: number): { join: string; params: any[] } => {
+      if (!filterField || !filterItemId || filterField === currentField) {
+        return { join: '', params: [] };
+      }
+      return {
+        join: `JOIN ost_form_entry_values fev_filter ON fe.id = fev_filter.entry_id AND fev_filter.field_id = ? AND fev_filter.value LIKE CONCAT('%"', ?, '"%')`,
+        params: [filterField, filterItemId]
+      };
+    };
+
+    const sectorFilter = buildFilterJoin(61);
+    const sectorQuery = `
+      SELECT li.id as item_id, li.value as valor, COUNT(DISTINCT t.ticket_id) as cantidad
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
+      ${sectorFilter.join}
       WHERE t.number >= 5000 AND fev.field_id = 61
         AND fev.value IS NOT NULL AND fev.value != ''
         AND YEAR(t.created) = ? AND MONTH(t.created) = ?
-      GROUP BY li.id, li.value
-      
-      UNION ALL
-      
-      SELECT 
-        'por_tipificacion' as tipo,
-        li.value as valor,
-        COUNT(DISTINCT t.ticket_id) as cantidad
+      GROUP BY li.id, li.value ORDER BY cantidad DESC;
+    `;
+
+    const tipoFilter = buildFilterJoin(57);
+    const tipoQuery = `
+      SELECT li.id as item_id, li.value as valor, COUNT(DISTINCT t.ticket_id) as cantidad
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
+      ${tipoFilter.join}
       WHERE t.number >= 5000 AND fev.field_id = 57
         AND li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
         AND YEAR(t.created) = ? AND MONTH(t.created) = ?
-      GROUP BY li.value, li.id
-      
-      UNION ALL
-      
-      SELECT 
-        'por_sistema' as tipo,
-        li.value as valor,
-        COUNT(DISTINCT t.ticket_id) as cantidad
+      GROUP BY li.value, li.id ORDER BY cantidad DESC;
+    `;
+
+    const sistemaFilter = buildFilterJoin(55);
+    const sistemaQuery = `
+      SELECT li.id as item_id, li.value as valor, COUNT(DISTINCT t.ticket_id) as cantidad
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
+      ${sistemaFilter.join}
       WHERE t.number >= 5000 AND fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
         AND YEAR(t.created) = ? AND MONTH(t.created) = ?
-      GROUP BY li.value, li.id;
+      GROUP BY li.value, li.id ORDER BY cantidad DESC;
     `;
-    
-    const [rows] = await pool.query<RowDataPacket[]>(query, [year, month, year, month, year, month]);
-    
-    const summary = {
+
+    const [sectorRows] = await pool.query<RowDataPacket[]>(sectorQuery, [...sectorFilter.params, year, month]);
+    const [tipoRows] = await pool.query<RowDataPacket[]>(tipoQuery, [...tipoFilter.params, year, month]);
+    const [sistemaRows] = await pool.query<RowDataPacket[]>(sistemaQuery, [...sistemaFilter.params, year, month]);
+
+    return {
       mes: month,
       anio: year,
-      tickets_por_sector: rows.filter((r: any) => r.tipo === 'por_sector').map((r: any) => ({ sector: r.valor, cantidad: r.cantidad })),
-      tickets_por_tipificacion: rows.filter((r: any) => r.tipo === 'por_tipificacion').map((r: any) => ({ tipificacion: r.valor, cantidad: r.cantidad })),
-      tickets_por_sistema: rows.filter((r: any) => r.tipo === 'por_sistema').map((r: any) => ({ sistema: r.valor, cantidad: r.cantidad }))
+      tickets_por_sector: sectorRows.map((r: any) => ({ id: r.item_id, sector: r.valor, cantidad: r.cantidad })),
+      tickets_por_tipificacion: tipoRows.map((r: any) => ({ id: r.item_id, tipificacion: r.valor, cantidad: r.cantidad })),
+      tickets_por_sistema: sistemaRows.map((r: any) => ({ id: r.item_id, sistema: r.valor, cantidad: r.cantidad }))
     };
-    
-    return summary;
   }
 }
