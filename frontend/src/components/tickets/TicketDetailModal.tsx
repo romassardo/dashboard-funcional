@@ -19,17 +19,26 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1048576).toFixed(1)} MB`
 }
 
+function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
 function parseFieldValue(value: string | null): string {
   if (!value || value === 'null' || value === '0') return ''
+  let result = value
   try {
     const parsed = JSON.parse(value)
     if (typeof parsed === 'object' && parsed !== null) {
-      return Object.values(parsed).filter(Boolean).join(', ')
+      result = Object.values(parsed).filter(Boolean).join(', ')
+    } else {
+      result = String(parsed)
     }
-    return String(parsed)
   } catch {
-    return value
+    // not JSON, keep as-is
   }
+  if (result.includes('<')) result = stripHtml(result)
+  return result.trim()
 }
 
 export function TicketDetailModal({ ticketId, onClose }: Props) {
