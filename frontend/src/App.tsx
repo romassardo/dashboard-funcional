@@ -81,19 +81,19 @@ function App() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-slate-900 dark:text-white">Panel de Control — Soporte Funcional & Data</h1>
           </div>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Soporte Funcional & Data" className="h-8 dark:mix-blend-lighten invert dark:invert-0" />
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
           </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* Logo */}
-        <img src="/logo.png" alt="Soporte Funcional & Data" className="h-12 dark:brightness-100 brightness-0 -mb-3" />
-
         {/* Filter Bar */}
         <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
           <div className="flex flex-wrap items-end gap-2">
