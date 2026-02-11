@@ -85,7 +85,7 @@ export const dashboardApi = {
     return response.data.data
   },
 
-  getTopUsers: async (filters: DateFilter, limit: number = 5) => {
+  getTopUsers: async (filters: DateFilter, limit: number = 10) => {
     const response = await api.get<{ success: boolean; data: TopUser[] }>(
       '/top-users',
       { params: { ...filters, limit } }
