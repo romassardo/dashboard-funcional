@@ -26,12 +26,13 @@ const FIELD_IDS: Record<string, number> = {
   sistema: 55
 }
 
-function SummaryTable({ title, data, color, fieldKey, isSource, onItemClick }: {
+function SummaryTable({ title, data, color, fieldKey, isSource, selectedItemId, onItemClick }: {
   title: string
   data: SummaryItem[]
   color: string
   fieldKey: string
   isSource: boolean
+  selectedItemId?: number
   onItemClick: (item: SummaryItem, fieldKey: string) => void
 }) {
   const total = data.reduce((s, i) => s + i.cantidad, 0)
@@ -51,7 +52,11 @@ function SummaryTable({ title, data, color, fieldKey, isSource, onItemClick }: {
               <div
                 key={item.id}
                 onClick={() => onItemClick(item, fieldKey)}
-                className="cursor-pointer rounded-lg px-2 py-1 -mx-2 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                className={`cursor-pointer rounded-lg px-2 py-1 -mx-2 transition-colors ${
+                  isSource && selectedItemId === item.id
+                    ? 'bg-blue-50 dark:bg-blue-500/15 ring-1 ring-blue-300 dark:ring-blue-500/30'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-slate-600 dark:text-slate-300 truncate mr-2">{item.name}</span>
@@ -188,17 +193,18 @@ export function MonthlySummaryCard() {
         </div>
       )}
 
-      {loading ? (
-        <div className="flex items-center justify-center py-10">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 z-10 flex items-center justify-center rounded-xl">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+          </div>
+        )}
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 transition-opacity duration-200 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+          <SummaryTable title="Por Sector" data={data.tickets_por_sector} color="#3B82F6" fieldKey="sector" isSource={activeFilter?.field === 61} selectedItemId={activeFilter?.field === 61 ? activeFilter.itemId : undefined} onItemClick={handleItemClick} />
+          <SummaryTable title="Por Tipificación" data={data.tickets_por_tipificacion} color="#6366F1" fieldKey="tipificacion" isSource={activeFilter?.field === 57} selectedItemId={activeFilter?.field === 57 ? activeFilter.itemId : undefined} onItemClick={handleItemClick} />
+          <SummaryTable title="Por Sistema" data={data.tickets_por_sistema} color="#10B981" fieldKey="sistema" isSource={activeFilter?.field === 55} selectedItemId={activeFilter?.field === 55 ? activeFilter.itemId : undefined} onItemClick={handleItemClick} />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <SummaryTable title="Por Sector" data={data.tickets_por_sector} color="#3B82F6" fieldKey="sector" isSource={activeFilter?.field === 61} onItemClick={handleItemClick} />
-          <SummaryTable title="Por Tipificación" data={data.tickets_por_tipificacion} color="#6366F1" fieldKey="tipificacion" isSource={activeFilter?.field === 57} onItemClick={handleItemClick} />
-          <SummaryTable title="Por Sistema" data={data.tickets_por_sistema} color="#10B981" fieldKey="sistema" isSource={activeFilter?.field === 55} onItemClick={handleItemClick} />
-        </div>
-      )}
+      </div>
     </div>
   )
 }
