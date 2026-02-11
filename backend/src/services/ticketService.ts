@@ -206,7 +206,7 @@ export class TicketService {
     const queryParams: any[] = [];
 
     if (params.search) {
-      conditions.push(`(t.number LIKE ? OR tc.subject LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ?)`);
+      conditions.push(`(t.number LIKE ? OR u.name LIKE ? OR CONCAT(s.firstname, ' ', s.lastname) LIKE ? OR li_sector.value LIKE ?)`);
       const s = `%${params.search}%`;
       queryParams.push(s, s, s, s);
     }
@@ -226,12 +226,15 @@ export class TicketService {
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const countQuery = `
-      SELECT COUNT(*) as total
+      SELECT COUNT(DISTINCT t.ticket_id) as total
       FROM ost_ticket t
       LEFT JOIN ost_ticket__cdata tc ON t.ticket_id = tc.ticket_id
       JOIN ost_ticket_status ts ON t.status_id = ts.id
       JOIN ost_user u ON t.user_id = u.id
       LEFT JOIN ost_staff s ON t.staff_id = s.staff_id
+      LEFT JOIN ost_form_entry fe_s ON t.ticket_id = fe_s.object_id AND fe_s.object_type = 'T'
+      LEFT JOIN ost_form_entry_values fev_s ON fe_s.id = fev_s.entry_id AND fev_s.field_id = 61
+      LEFT JOIN ost_list_items li_sector ON fev_s.value LIKE CONCAT('%"', li_sector.id, '"%')
       ${where}
     `;
 

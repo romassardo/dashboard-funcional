@@ -135,13 +135,13 @@ export function TicketListPage() {
         </div>
 
         {/* Column Headers */}
-        <div className="grid grid-cols-[80px_1fr_90px_140px_130px_140px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20">
+        <div className="grid grid-cols-[80px_1fr_90px_1fr_1fr_130px] gap-2 px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/20 text-center">
           <div>Número</div>
-          <div>Asunto</div>
           <div>Estado</div>
           <div>Agente</div>
           <div>Sector</div>
           <div>Usuario</div>
+          <div>Fecha</div>
         </div>
 
         {/* Rows */}
@@ -155,10 +155,9 @@ export function TicketListPage() {
             <div
               key={ticket.ticket_id}
               onClick={() => setSelectedTicketId(ticket.ticket_id)}
-              className="grid grid-cols-[80px_1fr_90px_140px_130px_140px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center"
+              className="grid grid-cols-[80px_1fr_90px_1fr_1fr_130px] gap-2 px-5 py-2.5 border-b border-slate-100/50 dark:border-slate-700/15 hover:bg-slate-50 dark:hover:bg-slate-700/20 cursor-pointer transition-colors items-center text-center"
             >
               <div className="text-sm font-mono text-cyan-500">#{ticket.number}</div>
-              <div className="text-sm text-slate-700 dark:text-slate-200 truncate">{ticket.asunto || '(sin asunto)'}</div>
               <div>
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[ticket.estado] || 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>{ticket.estado}</span>
               </div>
@@ -167,6 +166,7 @@ export function TicketListPage() {
                 {ticket.sector && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 truncate inline-block max-w-full">{ticket.sector}</span>}
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{ticket.usuario}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">{ticket.fecha_creacion}</div>
             </div>
           ))}
           {!loading && tickets.length === 0 && (
