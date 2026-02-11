@@ -198,12 +198,10 @@ export class TicketService {
     const [rows] = await pool.execute<RowDataPacket[]>(
       `SELECT CAST(COUNT(*) AS SIGNED) as total FROM ost_ticket t
        JOIN ost_ticket_status ts ON t.status_id = ts.id
-       WHERE t.number >= 5000 AND ts.name = ?`,
-      ['Open']
+       WHERE t.number >= 5000 AND ts.state = ?`,
+      ['open']
     );
-    const val = (rows[0] as any)?.total;
-    console.log('[getOpenTicketCount] raw value:', val, 'type:', typeof val);
-    return Number(val) || 0;
+    return Number((rows[0] as any)?.total) || 0;
   }
 
   async getTicketList(params: {
@@ -238,9 +236,9 @@ export class TicketService {
       queryParams.push(s, s, s, s);
     }
     if (params.status) {
-      const statusMap: Record<string, string> = { 'Abierto': 'Open', 'Resuelto': 'Resolved', 'Cerrado': 'Closed' };
-      conditions.push(`ts.name = ?`);
-      queryParams.push(statusMap[params.status] || params.status);
+      const stateMap: Record<string, string> = { 'Abierto': 'open', 'Resuelto': 'resolved', 'Cerrado': 'closed' };
+      conditions.push(`ts.state = ?`);
+      queryParams.push(stateMap[params.status] || params.status);
     }
     if (params.from && params.to) {
       conditions.push(`t.created BETWEEN ? AND ?`);
@@ -267,10 +265,10 @@ export class TicketService {
     const listQuery = `
       SELECT 
         t.ticket_id, t.number,
-        CASE ts.name
-          WHEN 'Open' THEN 'Abierto'
-          WHEN 'Resolved' THEN 'Resuelto'
-          WHEN 'Closed' THEN 'Cerrado'
+        CASE ts.state
+          WHEN 'open' THEN 'Abierto'
+          WHEN 'resolved' THEN 'Resuelto'
+          WHEN 'closed' THEN 'Cerrado'
           ELSE ts.name
         END as estado,
         COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
