@@ -12,7 +12,7 @@ import {
 
 export class TicketService {
   private buildDateFilter(filters: DateFilter): { clause: string; params: any[] } {
-    const conditions: string[] = [];
+    const conditions: string[] = ['t.number >= 5000'];
     const params: any[] = [];
     
     if (filters.from && filters.to) {
@@ -101,14 +101,24 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_user u ON t.user_id = u.id
       JOIN ost_user_email ue ON u.id = ue.user_id
-      WHERE 1=1 ${clause}
+      WHERE u.name NOT IN ('Gianfranco Policari', 'Sebastian Gaston', 'Rodrigo Massardo')
+        AND u.name NOT LIKE 'Agustina Prei%'
+        AND u.name NOT LIKE 'Roberto%'
+        ${clause}
       GROUP BY u.id, u.name, ue.address
       ORDER BY cantidad DESC
       LIMIT ?;
     `;
     
-    const [rows] = await pool.query<RowDataPacket[]>(query, [...params, limit]);
-    return rows as TopUser[];
+    console.log('DEBUG getTopUsers query:', query);
+    console.log('DEBUG getTopUsers params:', [...params, limit]);
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>(query, [...params, limit]);
+      return rows as TopUser[];
+    } catch (err) {
+      console.error('DEBUG SQL ERROR:', err);
+      throw err;
+    }
   }
 
   async getTopDepartments(filters: DateFilter, limit: number = 5): Promise<TopDepartment[]> {
@@ -195,7 +205,7 @@ export class TicketService {
         COUNT(t.ticket_id) as cantidad
       FROM ost_ticket t
       JOIN ost_department d ON t.dept_id = d.id
-      WHERE YEAR(t.created) = ? AND MONTH(t.created) = ?
+      WHERE t.number >= 5000 AND YEAR(t.created) = ? AND MONTH(t.created) = ?
       GROUP BY d.name
       
       UNION ALL
@@ -208,7 +218,7 @@ export class TicketService {
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
-      WHERE fev.field_id = 57
+      WHERE t.number >= 5000 AND fev.field_id = 57
         AND li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
         AND YEAR(t.created) = ? AND MONTH(t.created) = ?
@@ -224,7 +234,7 @@ export class TicketService {
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
       JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
-      WHERE fev.field_id = 55
+      WHERE t.number >= 5000 AND fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
         AND YEAR(t.created) = ? AND MONTH(t.created) = ?

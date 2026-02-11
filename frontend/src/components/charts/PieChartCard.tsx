@@ -26,16 +26,16 @@ export function PieChartCard({ title, data, colors, centerLabel }: DonutChartPro
   return (
     <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50 p-6 backdrop-blur-sm">
       <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">{title}</h3>
-      <div className="flex items-center gap-4">
-        <div className="w-1/2">
-          <ResponsiveContainer width="100%" height={200}>
+      <div className="flex items-center gap-2">
+        <div className="w-3/5 flex-shrink-0">
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
-                outerRadius={80}
+                innerRadius={60}
+                outerRadius={95}
                 paddingAngle={2}
                 dataKey="value"
                 stroke="none"
@@ -50,7 +50,7 @@ export function PieChartCard({ title, data, colors, centerLabel }: DonutChartPro
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="w-1/2 space-y-2 max-h-[200px] overflow-y-auto pr-2">
+        <div className="w-2/5 space-y-1.5">
           {data.map((item: any, index: number) => (
             <div key={item.name} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: colors[index % colors.length] }} />
