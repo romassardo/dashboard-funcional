@@ -23,6 +23,13 @@ export function TicketListPage() {
   const [toFilter, setToFilter] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null)
+  const [tipifOptions, setTipifOptions] = useState<string[]>([])
+
+  useEffect(() => {
+    dashboardApi.getTicketsByType({}).then((data: any[]) => {
+      setTipifOptions(data.map((d: any) => d.tipificacion).filter(Boolean))
+    }).catch(() => {})
+  }, [])
 
   const loadTickets = useCallback(async () => {
     setLoading(true)
@@ -113,10 +120,7 @@ export function TicketListPage() {
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tipificación</label>
             <select className="px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-lg text-slate-900 dark:text-white" value={tipifFilter} onChange={(e) => { setTipifFilter(e.target.value); setPage(1) }}>
               <option value="">Todas</option>
-              <option value="Incidente Funcional">Incidente Funcional</option>
-              <option value="Requerimiento Funcional">Requerimiento Funcional</option>
-              <option value="Incidente de Datos">Incidente de Datos</option>
-              <option value="Requerimiento de Datos">Requerimiento de Datos</option>
+              {tipifOptions.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
           <div>
