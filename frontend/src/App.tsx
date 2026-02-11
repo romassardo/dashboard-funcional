@@ -79,7 +79,7 @@ function App() {
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Soporte Funcional & Data" className="h-10 dark:brightness-100 brightness-0" />
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Panel de Control — Soporte Funcional & Data</h1>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
@@ -91,6 +91,9 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Logo */}
+        <img src="/logo.png" alt="Soporte Funcional & Data" className="h-12 dark:brightness-100 brightness-0 -mb-3" />
+
         {/* Filter Bar */}
         <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4 backdrop-blur-sm">
           <div className="flex flex-wrap items-end gap-2">
