@@ -52,7 +52,7 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
       WHERE fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
@@ -76,7 +76,7 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
       WHERE fev.field_id = 57
         AND li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
@@ -133,7 +133,7 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
       WHERE fev.field_id = 61
         AND fev.value IS NOT NULL AND fev.value != ''
         ${clause}
@@ -221,7 +221,7 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
       WHERE t.number >= 5000 AND fev.field_id = 57
         AND li.id IN (92, 93, 94, 107, 127, 129, 131, 132)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
@@ -237,7 +237,7 @@ export class TicketService {
       FROM ost_ticket t
       JOIN ost_form_entry fe ON t.ticket_id = fe.object_id AND fe.object_type = 'T'
       JOIN ost_form_entry_values fev ON fe.id = fev.entry_id
-      JOIN ost_list_items li ON JSON_UNQUOTE(JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"'))) = li.value
+      JOIN ost_list_items li ON JSON_EXTRACT(fev.value, CONCAT('$."', li.id, '"')) IS NOT NULL
       WHERE t.number >= 5000 AND fev.field_id = 55
         AND li.id IN (86, 88, 89, 90, 91, 106)
         AND fev.value LIKE CONCAT('%"', li.id, '"%')
