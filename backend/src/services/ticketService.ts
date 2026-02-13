@@ -236,9 +236,10 @@ export class TicketService {
       queryParams.push(s, s, s, s);
     }
     if (params.status) {
-      const nameMap: Record<string, string> = { 'Abierto': 'Open', 'Resuelto': 'Resolved', 'Cerrado': 'Closed' };
-      conditions.push(`ts.name = ?`);
-      queryParams.push(nameMap[params.status] || params.status);
+      const nameMap: Record<string, string[]> = { 'Abierto': ['Open', 'Abierto'], 'Resuelto': ['Resolved', 'Resuelto'], 'Cerrado': ['Closed', 'Cerrado'] };
+      const names = nameMap[params.status] || [params.status];
+      conditions.push(`ts.name IN (?, ?)`);
+      queryParams.push(...names);
     }
     if (params.from && params.to) {
       conditions.push(`t.created BETWEEN ? AND ?`);
