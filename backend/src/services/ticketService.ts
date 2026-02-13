@@ -236,9 +236,9 @@ export class TicketService {
       queryParams.push(s, s, s, s);
     }
     if (params.status) {
-      const stateMap: Record<string, string> = { 'Abierto': 'open', 'Resuelto': 'resolved', 'Cerrado': 'closed' };
-      conditions.push(`ts.state = ?`);
-      queryParams.push(stateMap[params.status] || params.status);
+      const nameMap: Record<string, string> = { 'Abierto': 'Open', 'Resuelto': 'Resolved', 'Cerrado': 'Closed' };
+      conditions.push(`ts.name = ?`);
+      queryParams.push(nameMap[params.status] || params.status);
     }
     if (params.from && params.to) {
       conditions.push(`t.created BETWEEN ? AND ?`);
@@ -265,10 +265,10 @@ export class TicketService {
     const listQuery = `
       SELECT 
         t.ticket_id, t.number,
-        CASE ts.state
-          WHEN 'open' THEN 'Abierto'
-          WHEN 'resolved' THEN 'Resuelto'
-          WHEN 'closed' THEN 'Cerrado'
+        CASE ts.name
+          WHEN 'Open' THEN 'Abierto'
+          WHEN 'Resolved' THEN 'Resuelto'
+          WHEN 'Closed' THEN 'Cerrado'
           ELSE ts.name
         END as estado,
         COALESCE(CONCAT(s.firstname, ' ', s.lastname), 'Sin asignar') as agente,
